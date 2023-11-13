@@ -22,7 +22,7 @@ The tracking/reporting of financial transactions is achieved via serverless arch
 
 ### ETL Flow Path (steps explained below)
 
-![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/ETL_flow.png?raw=true)
+![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/jpg_store/ETL_flow.png?raw=true)
 
 Once Wells Fargo detects an electronic payment has been made an email is sent to a Gmail account.
 
