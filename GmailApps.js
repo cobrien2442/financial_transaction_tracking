@@ -38,7 +38,7 @@ function setFincTrigger() {
   function s2_queryEmailsSend2AWS(depDate) {
     //sends info from emails to TransactionProcessor lambda
     //var search = 'in:inbox -in:read subject:jawntty'; 
-    var search = 'in:inbox -in:read subject:Wells Fargo Card ';
+    var search = 'in:inbox -in:read subject:Wells Fargo Card -Rewards';
   var threads = GmailApp.search(search);
     var msgs = GmailApp.getMessagesForThreads(threads);
     var arry = []
