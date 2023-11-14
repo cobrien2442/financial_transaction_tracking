@@ -88,7 +88,7 @@ function s2_queryEmailsSend2AWS2(depDate) {
       Logger.log(subject);
       var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/devtest/TransactionProcessor', options);
       Logger.log(response.getContentText());
-      s3_runAthenaQuery2();
+      s3_runAthenaQuery2(depDate);
       msgs[i][j].moveToTrash();
     }
   }
