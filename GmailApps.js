@@ -30,6 +30,7 @@ function s1_lastDepDate2() {
   var depDate = Utilities.formatDate(mesdate, "GMT", "MM/dd/yyyy");
   Logger.log("depDate: " + depDate);
   s2_queryEmailsSend2AWS2(depDate);
+  //s3_runAthenaQuery2(depDate);
 }
 
 function s2_queryEmailsSend2AWS2(depDate) {
@@ -80,13 +81,20 @@ function s2_queryEmailsSend2AWS2(depDate) {
       data['depDate'] = depDate;
       data['upDate'] = uDate;
 
+      var apiJawn = apiKey
+  
+      var headers = {
+        "x-api-key": apiJawn
+      };
+
       var options = {
         'payload': JSON.stringify(data),
+        'headers': headers
       };
 
       Logger.log(options);
       Logger.log(subject);
-      var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/devtest/TransactionProcessor', options);
+      var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
       Logger.log(response.getContentText());
       s3_runAthenaQuery2(depDate);
       msgs[i][j].moveToTrash();
@@ -104,8 +112,15 @@ function s3_runAthenaQuery2(depDate) {
     'query' : qstring
   }
 
+  var apiJawn = apiKey
+  
+  var headers = {
+    "x-api-key": apiJawn
+  };
+
   var options = {
     'payload': JSON.stringify(data),
+    'headers': headers
   };
 
   // Tells Athena to run Query via TransactionProcessor_step2 lambda
@@ -125,10 +140,19 @@ function s4_getAthenaResults2(queryExecutionId) {
   var formData = {
     'queryExecutionId': queryExecutionId,
   };
+
+  var apiJawn = apiKey
+  
+  var headers = {
+    "x-api-key": apiJawn
+  }; 
+
   var options = {
     'payload': JSON.stringify(formData),
+    'headers': headers
   };
-  var response = UrlFetchApp.fetch('https://op5djfxjcb.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor_step3', options);
+
+  var response = UrlFetchApp.fetch('https://9g1falkc01.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor_step3', options);
   var data = JSON.parse(response.getContentText());
   Logger.log(data);
   GmailApp.sendEmail("cobrien2442@gmail.com", "Card transaction", data);
