@@ -26,7 +26,7 @@ The tracking/reporting of financial transactions is achieved via serverless arch
 
 Once Wells Fargo detects an electronic payment has been made an email is sent to a Gmail account.
 
-### step 1
+### step 1 ([GmailApps.js:s1_lastDepDate2()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?plain=1#24),[GmailApps.js:s2_queryEmailsSend2AWS2()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?plain=1#36),(TransactionProcessor.py)[https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor.py?plain=1#1])
 GoogleApps script has a time driven trigger that runs once every 60 seconds. If an email is detected that appears to have come from the bank stating a transaction has been made the following occurs: GmailApps script parses the email to find cost of transaction, the date/time of the transaction, where the transaction took place, and runs a separate search to find last paycheck deposit. This information is then stored in variables (in json format) that is sent to an AWS API. If the API successfully receives the information the script deletes the current email. 
 
 ### step 2
