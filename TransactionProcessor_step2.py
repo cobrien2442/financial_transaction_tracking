@@ -13,7 +13,6 @@ def lambda_handler(event, context):
     body = json.loads(event['body'])
       
     query = body['query']
-    #query = "SELECT * FROM cardtrans.financetrackingraw"
 
     client = boto3.client('athena')
 
