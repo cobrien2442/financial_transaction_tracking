@@ -28,31 +28,27 @@ function s1_lastDepDate2() {
   var latestMessage = msgs[0];
   var mesdate = latestMessage.getDate();
   var depDate = Utilities.formatDate(mesdate, "GMT", "MM/dd/yyyy");
-  Logger.log("depDate: " + depDate);
-  s2_queryEmailsSend2AWS2(depDate);
-  //s3_runAthenaQuery2(depDate);
+  var search = 'in:inbox subject:Wells Fargo Card -credit'; //-in:read from:alerts@notify.wellsfargo.com';
+  s2_queryEmailsSend2AWS(depDate, search);
+  var search = 'in:inbox subject:You made a credit card purchase'; //-in:read from:alerts@notify.wellsfargo.com';
+  s2V1_queryEmailsSend2AWS(depDate, search);
 }
 
-function s2_queryEmailsSend2AWS2(depDate) {
+function s2_queryEmailsSend2AWS(depDate, search) {
   // Sends info from emails to TransactionProcessor lambda
-  var search = 'in:inbox -in:read subject:Wells Fargo Card -Rewards from:alerts@notify.wellsfargo.com';
-  //var search = 'in:inbox -in:read subject:Wells Fargo Card -Rewards';
   var threads = GmailApp.search(search);
   var msgs = GmailApp.getMessagesForThreads(threads);
-  var arry = [];
 
   for (var i = 0; i < msgs.length; i++) {
     for (var j = 0; j < msgs[i].length; j++) {
-      let index = arry.length;
       var subject = msgs[i][j].getSubject();
       var body = msgs[i][j].getPlainBody();
       var d = new Date();
       var uDate = d.toISOString();
-      var subBody = 'Subject==>' + '\r' + subject + '\r' + 'Body==>' + '\r' + body;
       // Send attachments to S3 storage 
-
       // Define regular expressions to match the required information
-      const cardRegex = /\*Card\* ending in (\d{4})/;
+      const cardRegex = /\*Card\* \*ending in\* (\d{4})/;
+      const card2Regex = /\*Card\* ending in (\d{4})/;
       const purchaseAmountRegex = /\*Purchase amount\* (\d+\.\d+) USD/;
       const merchantDetailsRegex = /\*Merchant details\* at (.+)/;
       const dateRegex = /\*Date\* ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4} [0-9]{2}:[0-9]{2} [APap][Mm] [A-Za-z\/]+)/;
@@ -60,12 +56,13 @@ function s2_queryEmailsSend2AWS2(depDate) {
       // Function to extract information from email
       function extractInfo(content) {
         const cardMatch = content.match(cardRegex);
+        const cardMatch2 = content.match(card2Regex);
         const purchaseAmountMatch = content.match(purchaseAmountRegex);
         const merchantDetailsMatch = content.match(merchantDetailsRegex);
         const dateMatch = content.match(dateRegex);
 
         const info = {
-          Card: cardMatch ? cardMatch[1] : 'Not found',
+          'Card': cardMatch ? cardMatch[1] : (cardMatch2 ? cardMatch2[1] : 'Not found'),
           'Purchaseamount': purchaseAmountMatch ? purchaseAmountMatch[1] : 'Not found',
           'Merchantdetails': merchantDetailsMatch ? merchantDetailsMatch[1] : 'Not found',
           'date': dateMatch ? dateMatch[1] : 'Not found'
@@ -83,21 +80,98 @@ function s2_queryEmailsSend2AWS2(depDate) {
 
       var apiJawn = apiKey
   
-      var headers = {
-        "x-api-key": apiJawn
-      };
+      var headers = {"x-api-key": apiJawn};
 
       var options = {
         'payload': JSON.stringify(data),
         'headers': headers
       };
 
-      Logger.log(options);
-      Logger.log(subject);
-      var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
-      Logger.log(response.getContentText());
-      s3_runAthenaQuery2(depDate);
-      msgs[i][j].moveToTrash();
+      Logger.log("s2_queryEmailsSend2AWS2()== > search, subject, & options:");
+      Logger.log(options['payload']);
+      Logger.log("  ");
+
+      //Trouble shooting help (turn below two lines on to trouble shoot issues)
+      //Logger.log("  " + subject);
+      Logger.log("  " + body);
+
+      //Put 'Try' statement here, if below three lines fail ==> send email info to yourself and stop script
+
+      //var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
+      //Logger.log(response.getContentText());
+      //s3_runAthenaQuery2(depDate);
+      //msgs[i][j].moveToTrash();
+    }
+  }
+}
+
+function s2V1_queryEmailsSend2AWS(depDate, search) {
+  // Sends info from emails to TransactionProcessor lambda
+  var threads = GmailApp.search(search);
+  var msgs = GmailApp.getMessagesForThreads(threads);
+
+  for (var i = 0; i < msgs.length; i++) {
+    for (var j = 0; j < msgs[i].length; j++) {
+      var subject = msgs[i][j].getSubject();
+      var body = msgs[i][j].getPlainBody();
+      var d = new Date();
+      var uDate = d.toISOString();
+      // Send attachments to S3 storage 
+      // Define regular expressions to match the required information
+      const cardRegex = /Credit card (\d{4})/;
+      const purchaseAmountRegex = /Amount \$([\d.]+)/;
+      const merchantDetailsRegex = /Merchant detail (.+)/;
+      const dateRegex = /\*Date\* ([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4} [0-9]{2}:[0-9]{2} [APap][Mm] [A-Za-z\/]+)/;
+
+      // Function to extract information from email
+      function extractInfo(content) {
+        const cardMatch = content.match(cardRegex);
+        const purchaseAmountMatch = content.match(purchaseAmountRegex);
+        const merchantDetailsMatch = content.match(merchantDetailsRegex);
+        const dateMatch = content.match(dateRegex);
+
+        const info = {
+          'Card': cardMatch ? cardMatch[1] : 'Not found',
+          'Purchaseamount': purchaseAmountMatch ? purchaseAmountMatch[1] : 'Not found',
+          'Merchantdetails': merchantDetailsMatch ? merchantDetailsMatch[1] : 'Not found',
+          'date': dateMatch ? dateMatch[1] : msgs[i][j].getDate()
+        };
+
+        return info;
+      }
+
+      // Parse the email content and extract the information
+      const extractedInfo = extractInfo(body);
+
+      var data = extractedInfo;
+      data['depDate'] = depDate;
+      data['upDate'] = uDate;
+
+      var apiJawn = apiKey
+  
+      var headers = {"x-api-key": apiJawn};
+
+      var options = {
+        'payload': JSON.stringify(data),
+        'headers': headers
+      };
+
+      Logger.log("s2V1_queryEmailsSend2AWS2()== > search, subject, & options:");
+      Logger.log(options['payload']);
+      Logger.log("  ");
+
+      //Trouble shooting help (turn below two lines on to trouble shoot issues)
+      //Logger.log("  " + subject);
+      //Logger.log("  " + body);
+
+      //Put 'Try' statement here, if below three lines fail ==> send email info to yourself and stop script
+
+      //create new Lambda func to upload info too
+
+      //var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
+      //Logger.log(response.getContentText());
+      //s3_runAthenaQuery2(depDate);
+      //msgs[i][j].moveToTrash();
     }
   }
 }
