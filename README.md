@@ -45,3 +45,5 @@ Once the data is received by the JavaScript an email is sent to the user (via [G
 Create IOS app that receives transaction data (from AWS) and sends push notification to phone. I am enrolled in the Apple Developer Program but have not started developing on the platform. The plan is to start creating the IOS app late 12/2023 or early 01/2024.
 
 Since this system is currently 'working' as is, I would like to clean up some minor bugs before diving into new dev platform. -20231115
+
+Note: switched email away from personal 20231116
