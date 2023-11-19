@@ -34,11 +34,11 @@ function s1_lastDepDate() {
   s2_queryEmailsSend2AWS(depDate, search, ccPay);
 
   var search = 'in:inbox -in:read subject:You made a credit card purchase from:alerts@notify.wellsfargo.com';
-  var ccPay = 0
+  var ccPay = 1
   s2_queryEmailsSend2AWS(depDate, search, ccPay);
 
   var search = 'in:inbox -in:read subject:You made a payment from:alerts@notify.wellsfargo.com';
-  var ccPay = 1
+  var ccPay = 2
   s2_queryEmailsSend2AWS(depDate, search, ccPay);
 
 }
@@ -48,7 +48,7 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
   var threads = GmailApp.search(search);
   var msgs = GmailApp.getMessagesForThreads(threads);
 
-  if (ccPay < 1){
+  if (ccPay < 2){
     for (var i = 0; i < msgs.length; i++) {
       for (var j = 0; j < msgs[i].length; j++) {
         var subject = msgs[i][j].getSubject();
@@ -79,11 +79,13 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
           const dateMatch = content.match(dateRegex);
           const dateMatch2 = content.match(dateCredRegex);
 
+          var formattedDate = Utilities.formatDate(msgs[i][j].getDate(), "EST", "MM/dd/yyyy hh:mm a");
+
           const info = {
             'Card': cardMatch ? cardMatch[1] : (cardMatch2 ? cardMatch2[1] : (cardMatch3 ? cardMatch3[1] : 'Not found')),
             'Purchaseamount': purchaseAmountMatch ? purchaseAmountMatch[1] : (purchaseAmountMatch2 ? purchaseAmountMatch2[1] : 'Not found'),
             'Merchantdetails': merchantDetailsMatch ? merchantDetailsMatch[1] : (merchantDetailsMatch2 ? merchantDetailsMatch2[1] : 'Not found'),
-            'date': dateMatch ? dateMatch[1] : (dateMatch2 ? dateMatch2[1] : msgs[i][j].getDate())
+            'date': dateMatch ? dateMatch[1] : (dateMatch2 ? dateMatch2[1] : formattedDate)
           };
 
           return info;
@@ -117,14 +119,19 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
         //Logger.log("  " + body);
 
         //Put 'Try' statement here, if below three lines fail ==> send email info to yourself and stop script
-
-        var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
-        Logger.log(response.getContentText());
-        s3_runAthenaQuery2(depDate);
-        msgs[i][j].moveToTrash();
+        try {
+          var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
+          Logger.log(response.getContentText());
+          s3_runAthenaQuery(depDate);
+          msgs[i][j].moveToTrash();
+        }catch(error){
+          Logger.log(error);
+          Logger.log(subject);
+          msgs[i][j].markRead();
+        }
       }
     }
-  } else if(ccPay == 1){
+  } else if(ccPay == 2){
 
     for (var i = 0; i < msgs.length; i++) {
       for (var j = 0; j < msgs[i].length; j++) {
@@ -183,14 +190,14 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
 
         //Put 'Try' statement here, if below three lines fail ==> send email info to yourself and stop script
 
-        var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
-        Logger.log(response.getContentText());
-        s3_runAthenaQuery2(depDate);
+        //var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
+        //Logger.log(response.getContentText());
+        //s3_runAthenaQuery2(depDate);
         //msgs[i][j].moveToTrash();
       }
     }
   } else {
-    Logger.log("major error")
+    Logger.log("s2_queryEmailsSend2AWS was called w/out a ccPay var")
   }
 }
 
