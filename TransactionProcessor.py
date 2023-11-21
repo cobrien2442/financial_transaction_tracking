@@ -35,6 +35,17 @@ def toS3(body):
     
     intibody = json.dumps(body)
     
+    intPurch = float(body['Purchaseamount'])
+    if intPurch <= 10:
+        body['purchRange'] = 'sml'
+    elif intPurch > 10 and intPurch <= 100:
+        body['purchRange'] = 'med'
+    elif intPurch > 100 and intPurch <= 999:
+        body['purchRange'] = 'lrg'
+    elif intPurch >= 1000:
+        body['purchRange'] = 'xlrg'
+        
+
     upDateClean = body['upDate']
     upDateClean = upDateClean.replace("-","")
     upDateClean = upDateClean.replace(":","")
@@ -62,6 +73,7 @@ def toS3(body):
         
         body['date'] = timeObj.strftime('%m/%d/%Y')
         body['time'] = timeObj.strftime('%I:%M %p')
+        body['day_of_the_week'] = timeObj.strftime('%A')
     
         s3object.put(
             Body=(bytes(json.dumps(body).encode('UTF-8')))
@@ -83,6 +95,7 @@ def toS3(body):
         
         body['date'] = timeObj.strftime('%m/%d/%Y')
         body['time'] = timeObj.strftime('%I:%M %p')
+        body['day_of_the_week'] = timeObj.strftime('%A')
     
         s3object.put(
             Body=(bytes(json.dumps(body).encode('UTF-8')))

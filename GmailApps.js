@@ -109,8 +109,6 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
           'headers': headers
         };
 
-        //Logger.log("s2_queryEmailsSend2AWS2()== > search, subject, & options:");
-        Logger.log(options['payload']);
         //Logger.log("  " + body);
         //Logger.log("  ");
 
@@ -127,6 +125,7 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
         }catch(error){
           Logger.log(error);
           Logger.log(subject);
+          msgs[i][j].star()
           msgs[i][j].markRead();
         }
       }
@@ -201,11 +200,12 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
   }
 }
 
+
 function s3_runAthenaQuery(depDate) {
   // Tells Athena to run Query via TransactionProcessor_step2 lambda
   var depDate1 = depDate
 
-  var qstring = "SELECT SUM(purchaseamount) AS spent FROM cardtrans.financetrackingraw WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + depDate1 + "','%m/%d/%Y') and date_parse(depdate,'%m/%d/%Y') >= date_parse('" + depDate1 + "', '%m/%d/%Y')"
+  var qstring = "SELECT * FROM cardtrans.financetrackingraw WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + depDate1 + "','%m/%d/%Y') and date_parse(depdate,'%m/%d/%Y') >= date_parse('" + depDate1 + "', '%m/%d/%Y')"
 
   var data = {
     'query' : qstring
@@ -251,6 +251,7 @@ function s4_getAthenaResults2(queryExecutionId) {
     'headers': headers
   };
 
+  Logger.log(options)
   var response = UrlFetchApp.fetch('https://9g1falkc01.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor_step3', options);
   var data = JSON.parse(response.getContentText());
   Logger.log(data);
