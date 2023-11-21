@@ -39,7 +39,7 @@ After receiving confirmation that the file has been uploaded to the S3 bucket, G
 The JavaScript pauses to allow the query to finish properly before making another API request (via [function s4_getAthenaResults2()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?plain=1#L237)). This API request triggers a Lambda function ([TransactionProcessor_step3.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor_step3.py?plain=1#L1)) to retrieve the query results from the 'clean' S3 bucket. The API returns the data to the GmailApps script.
 
 ### step 5
-Once the data is received by the JavaScript an email is sent to the user (via [GmailApp.sendEmail](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?plain=1#L257)).
+Once the data is received by the JavaScript an email is sent to the user (via [GmailApp.sendEmail](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?plain=1#L258)).
 
 ## Future Steps:
 Create IOS app that receives transaction data (from AWS) and sends push notification to phone. I am enrolled in the Apple Developer Program but have not started developing on the platform. The plan is to start creating the IOS app late 12/2023 or early 01/2024.
