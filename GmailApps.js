@@ -29,11 +29,11 @@ function s1_lastDepDate() {
   var mesdate = latestMessage.getDate();
   var depDate = Utilities.formatDate(mesdate, "GMT", "MM/dd/yyyy");
 
-  var search = 'in:inbox -in:read subject:Wells Fargo Card -credit from:alerts@notify.wellsfargo.com';
+  var search = 'in:inbox -in:read subject:Wells Fargo Card -credit -withdrawal from:alerts@notify.wellsfargo.com';
   var ccPay = 0
   s2_queryEmailsSend2AWS(depDate, search, ccPay);
 
-  var search = 'in:inbox -in:read subject:You made a credit card purchase from:alerts@notify.wellsfargo.com';
+  var search = 'in:inbox -in:read subject:You made a credit card purchase -withdrawal from:alerts@notify.wellsfargo.com';
   var ccPay = 1
   s2_queryEmailsSend2AWS(depDate, search, ccPay);
 
