@@ -57,7 +57,7 @@ def toS3(body):
     s3 = boto3.resource('s3')
     s3object = s3.Object(bucket, fileName)
     
-    if body['ccPay'] == 0:
+    if (body['ccPay'] == 0 or body['ccPay'] == 3):
         intDatetime = body['date'][:-11]
         dateClean = body['date'][:-20]
         year = dateClean[6:]

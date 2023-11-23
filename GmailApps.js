@@ -269,12 +269,12 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
 
         //Put 'Try' statement here, if below three lines fail ==> send email info to yourself and stop script
 
-        //var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
+        var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
         //Logger.log(response.getContentText());
-        //s3_runAthenaQuery2(depDate);
-        //msgs[i][j].moveToTrash();
-        msgs[i][j].markRead();
-        msgs[i][j].star();
+        s3_runAthenaQuery(depDate);
+        msgs[i][j].moveToTrash();
+        //msgs[i][j].markRead();
+        //msgs[i][j].star();
       }
     }
   }
