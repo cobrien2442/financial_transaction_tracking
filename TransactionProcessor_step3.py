@@ -1,6 +1,6 @@
 import json
 import boto3
-from datetime import datetime
+from datetime import datetime, timedelta
 import csv
 
 
@@ -49,9 +49,16 @@ def lambda_handler(event, context):
             
     #Subtrack sum spent from pay period allowance 
     allowanceLeft = 1000 - formatted_sum
+    formatted_allowanceLeft = round(allowanceLeft, 2)
+    
+    depDate = datetime.strptime(body['depDate'], '%m/%d/%Y')
+    NextdepDate = depDate + timedelta(weeks=2)
+    SNextdepDate = NextdepDate.strftime('%m/%d/%Y')
+    
+    
     
     #create message to send to user
-    message = "You've spent $" + str(formatted_sum) + " of your $1000 allowance. You have $" + str(allowanceLeft) + " left."
+    message = "You've spent $" + str(formatted_sum) + " of your $1000 allowance. You have $" + str(formatted_allowanceLeft) + " left until " + SNextdepDate + "."
     message2 = " The last transaction took place at " + latest_transaction['merchantdetails'] + "  where you spent $" + str(latest_transaction['purchaseamount']) + " at " + str(latest_transaction['combined_datetime'])
     
     response = str(message) + str(message2)

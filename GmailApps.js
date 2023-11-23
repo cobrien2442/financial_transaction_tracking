@@ -41,7 +41,7 @@ function s1_lastDepDate() {
   var ccPay = 2
   s2_queryEmailsSend2AWS(depDate, search, ccPay);
 
-  var search = 'in:inbox -inread subject:Wells Fargo card withdrawal exceeded preset amount from:alerts@notify.wellsfargo.com'
+  var search = 'in:inbox -in:read subject:Wells Fargo card withdrawal exceeded preset amount from:alerts@notify.wellsfargo.com'
   var ccPay = 3
   s2_queryEmailsSend2AWS(depDate, search, ccPay);
 }
@@ -311,13 +311,14 @@ function s3_runAthenaQuery(depDate) {
 
   Utilities.sleep(2 * 1000);
 
-  s4_getAthenaResults2(queryExecutionId);
+  s4_getAthenaResults2(queryExecutionId, depDate);
 }
 
-function s4_getAthenaResults2(queryExecutionId) {
+function s4_getAthenaResults2(queryExecutionId, depDate) {
   // Gets Athena results via TransactionProcessor_step3 lambda
   var formData = {
     'queryExecutionId': queryExecutionId,
+    'depDate': depDate
   };
 
   var apiJawn = apiKey
