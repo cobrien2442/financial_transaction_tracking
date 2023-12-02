@@ -20,6 +20,17 @@ def lambda_handler(event, context):
     data_rows = data['ResultSet']['Rows']
     purchase_amounts = [float(row['Data'][1]['VarCharValue']) for row in data_rows[1:]]
     days_of_week = [row['Data'][-1]['VarCharValue'] for row in data_rows[1:]]
+    card_values = [row['Data'][0]['VarCharValue'] for row in data_rows[1:]]
+    purchase_amounts = [float(row['Data'][1]['VarCharValue']) for row in data_rows[1:]]
+    merchant_details = [row['Data'][2]['VarCharValue'] for row in data_rows[1:]]
+    dates = [row['Data'][3]['VarCharValue'] for row in data_rows[1:]]
+    updates = [row['Data'][4]['VarCharValue'] for row in data_rows[1:]]
+    dep_dates = [row['Data'][5]['VarCharValue'] for row in data_rows[1:]]
+    times = [row['Data'][6]['VarCharValue'] for row in data_rows[1:]]
+    cc_pay_values = [float(row['Data'][7]['VarCharValue']) for row in data_rows[1:]]
+    subject_values = [row['Data'][8]['VarCharValue'] for row in data_rows[1:]]
+    purchase_range_values = [row['Data'][9]['VarCharValue'] for row in data_rows[1:]]
+    days_of_week = [row['Data'][-1]['VarCharValue'] for row in data_rows[1:]]
 
     # Calculating total purchase amounts for each day
     daily_totals = {}
