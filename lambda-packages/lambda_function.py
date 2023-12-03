@@ -3,10 +3,20 @@ import json
 import base64
 import boto3
 from matplotlib import pyplot as plt
+import seaborn as sns
+import pandas as pd
+from datetime import datetime
+
 
 def lambda_handler(event, context):
+
+    print (event)
+
+    body = json.loads(event['body'])
+
+    queryExecutionId = body['queryExecutionId']
+
     # Your existing code to fetch data and create the plot...
-    queryExecutionId = 'b27c6acb-b659-40df-abac-781ef585bceb'
     client = boto3.client('athena')
     queryID = queryExecutionId
     results = client.get_query_results(QueryExecutionId = queryID)
@@ -18,8 +28,6 @@ def lambda_handler(event, context):
 
     # Extracting purchase amounts and days of the week
     data_rows = data['ResultSet']['Rows']
-    purchase_amounts = [float(row['Data'][1]['VarCharValue']) for row in data_rows[1:]]
-    days_of_week = [row['Data'][-1]['VarCharValue'] for row in data_rows[1:]]
     card_values = [row['Data'][0]['VarCharValue'] for row in data_rows[1:]]
     purchase_amounts = [float(row['Data'][1]['VarCharValue']) for row in data_rows[1:]]
     merchant_details = [row['Data'][2]['VarCharValue'] for row in data_rows[1:]]
@@ -43,7 +51,6 @@ def lambda_handler(event, context):
     days = list(daily_totals.keys())
     totals = list(daily_totals.values())
 
-    plt.figure(figsize=(10, 6))
     plt.bar(days, totals, color='skyblue')
     plt.xlabel('Day of the Week')
     plt.ylabel('Total Purchase Amount')
@@ -51,18 +58,54 @@ def lambda_handler(event, context):
     plt.xticks(rotation=45)
     plt.tight_layout()
 
-    # Save the plot to a BytesIO object
+    # Save the first plot to a BytesIO object
     buffer = io.BytesIO()
     plt.savefig(buffer, format='png')
     buffer.seek(0)
-    
-    # Convert the buffer to bytes and encode in base64
     image_bytes = buffer.getvalue()
     encoded_image = base64.b64encode(image_bytes).decode('utf-8')
 
+    time_values = [datetime.strptime(time, '%I:%M %p').hour for time in times]
+
+    # Convert 'dates' to datetime objects
+    date_objects = [datetime.strptime(date, '%m/%d/%Y') for date in dates]
+
+    # Convert days_of_week to numerical values
+    #numerical_days = [day_map[day] for day in days_of_week]
+
+    data_dict = {
+        'Card': card_values,
+        'PurchaseAmount': purchase_amounts,
+        'Date': date_objects,
+        'Update': updates,
+        'DepDate': dep_dates,
+        'Time': time_values,
+        'Subject': subject_values,
+        'PurchRange': purchase_range_values,
+        'DayOfWeek': days_of_week
+    }
+
+    df = pd.DataFrame(data_dict)
+
+    # Count occurrences of each date and create a new column 'DateCount'
+    df['DayNumOfTrans'] = df['Date'].map(df['Date'].value_counts())
+    df['TimeCount'] = df['Time'].map(df['Time'].value_counts())
+
+    # Creating Seaborn boxplot
+    sns.boxplot(data=df, y="PurchaseAmount", x="DayOfWeek")
+
+    # Save the Seaborn plot to a BytesIO object
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    image_bytes2 = buffer.getvalue()
+    encoded_image2 = base64.b64encode(image_bytes2).decode('utf-8')
+
+    body1 = json.dumps({'bar': encoded_image, 'box': encoded_image2})
+
     return {
-        'headers': { "Content-Type": "image/png" },
+        'isBase64Encoded': True,
         'statusCode': 200,
-        'body': encoded_image,
-        'isBase64Encoded': True
+        'headers': {"Content-Type": "application/json"},
+        'body': body1
     }
