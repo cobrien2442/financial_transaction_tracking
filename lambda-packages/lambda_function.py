@@ -10,11 +10,14 @@ from datetime import datetime
 
 def lambda_handler(event, context):
 
+    #print (event)
     print (event)
 
-    body = json.loads(event['body'])
+    #502 code gets returned when i add below line to code 
+    #body = json.loads(event['body'])
 
-    queryExecutionId = body['queryExecutionId']
+    #queryExecutionId = body['queryExecutionId']
+    queryExecutionId = 'b27c6acb-b659-40df-abac-781ef585bceb'
 
     # Your existing code to fetch data and create the plot...
     client = boto3.client('athena')
@@ -92,6 +95,7 @@ def lambda_handler(event, context):
     df['TimeCount'] = df['Time'].map(df['Time'].value_counts())
 
     # Creating Seaborn boxplot
+    plt.figure()  # Create a new figure for Seaborn plot
     sns.boxplot(data=df, y="PurchaseAmount", x="DayOfWeek")
 
     # Save the Seaborn plot to a BytesIO object
@@ -101,11 +105,14 @@ def lambda_handler(event, context):
     image_bytes2 = buffer.getvalue()
     encoded_image2 = base64.b64encode(image_bytes2).decode('utf-8')
 
-    body1 = json.dumps({'bar': encoded_image, 'box': encoded_image2})
+    #body1 = json.dumps({'bar': encoded_image, 'box': encoded_image2})
 
+    #test this setup on 20231204
     return {
         'isBase64Encoded': True,
         'statusCode': 200,
-        'headers': {"Content-Type": "application/json"},
-        'body': body1
+        'headers': {"Content-Type": "image/png"},
+        #'headers': {"Content-Type": "image/png"},
+        'body': json.dumps({'bar': encoded_image, 'box': encoded_image2})
+        #'body': encoded_image2
     }
