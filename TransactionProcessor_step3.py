@@ -32,7 +32,7 @@ def lambda_handler(event, context):
     # Iterate through the rows to find the latest transaction
     for row in results['ResultSet']['Rows'][1:]:
         date = row['Data'][3]['VarCharValue']  # Assuming 'date' is at index 3
-        time = row['Data'][6]['VarCharValue']  # Assuming 'time' is at index 6
+        time = row['Data'][5]['VarCharValue']  # Assuming 'time' is at index 5
         combined_datetime = f"{date} {time}"  # Combining date and time
         
         # Convert combined datetime to a datetime object for comparison

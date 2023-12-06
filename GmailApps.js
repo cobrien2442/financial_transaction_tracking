@@ -285,7 +285,14 @@ function s3_runAthenaQuery(depDate) {
   // Tells Athena to run Query via TransactionProcessor_step2 lambda
   var depDate1 = depDate
 
-  var qstring = "SELECT * FROM cardtrans.financetrackingraw WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + depDate1 + "','%m/%d/%Y') and date_parse(depdate,'%m/%d/%Y') >= date_parse('" + depDate1 + "', '%m/%d/%Y')"
+  // have to do a group all to account for merchants double/triple pulling transactions
+  var qstring = "SELECT card, purchaseamount, merchantdetails, date, depdate, " +
+    "time, ccpay, subject, purchrange, day_of_the_week " +
+    "FROM cardtrans.financetrackingraw " +
+    "WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + depDate1 + "','%m/%d/%Y') " +
+    "and date_parse(depdate,'%m/%d/%Y') >= date_parse('" + depDate1 + "', '%m/%d/%Y') " +
+    "GROUP BY card, purchaseamount, merchantdetails, date, depdate, " +
+    "time, ccpay, subject, purchrange, day_of_the_week";
 
   var data = {
     'query' : qstring

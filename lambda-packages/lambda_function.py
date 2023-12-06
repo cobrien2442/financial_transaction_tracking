@@ -10,8 +10,6 @@ from datetime import datetime
 
 def lambda_handler(event, context):
 
-    #print (event)
-
     binary_data = event['body']
 
     decoded_data = base64.b64decode(binary_data)
