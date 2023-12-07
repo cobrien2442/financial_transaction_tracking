@@ -106,15 +106,13 @@ def lambda_handler(event, context):
         image_bytes2 = buffer.getvalue()
         encoded_image2 = base64.b64encode(image_bytes2).decode('utf-8')
 
-        #body1 = json.dumps({'bar': encoded_image, 'box': encoded_image2})
-
-        #test this setup on 20231204
         return {
-            'isBase64Encoded': True,
             'statusCode': 200,
+            #'isBase64Encoded': False,
+            'isBase64Encoded': True,
+            #'headers': {"Content-Type": "application/json"},
             'headers': {"Content-Type": "image/png"},
-            #'headers': {"Content-Type": "image/png"},
-            #'body': json.dumps({'bar': encoded_image, 'box': encoded_image2})
+            #try 1 == > "body": json.dumps("{\"bar\": \"encoded_image\", \"box\": \"encoded_image2\"}")
+            #try 2 == > "body": json.dumps("{\"bar\": \encoded_image\, \"box\": \encoded_image2\}")
             'body': encoded_image2
         }
-    
