@@ -344,4 +344,46 @@ function s4_getAthenaResults2(queryExecutionId, depDate) {
   var data = JSON.parse(response.getContentText());
   Logger.log(data);
   GmailApp.sendEmail("cobrien2442@gmail.com", "Card transaction", data);
+
+  s5_getAthenaResults(queryExecutionId);
+}
+
+function s5_getAthenaResults(queryExecutionId) {
+  var url = 'https://1ffccx3cgg.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor_test';
+  //var apiKey = 'your_api_key_here'; // Replace with your API key
+  
+  var queryExecutionId = 'b27c6acb-b659-40df-abac-781ef585bceb'
+
+  var headers = {
+    "x-api-key": apiKey
+  }; 
+
+  var formData = {
+    'queryExecutionId': queryExecutionId
+  };
+
+  var options = {
+    //'contentType': 'application/json',
+    'payload': JSON.stringify(formData),
+    'headers': headers
+  };
+
+  Logger.log(options)
+
+  var response = UrlFetchApp.fetch(url, options);
+  var imageBlob = response.getBlob(); // Get the image as a blob
+
+  // Replace 'recipient_email_address' with the email address where you want to send the email
+  var recipientEmail = 'cobrien2442@gmail.com';
+  var subject = 'Email with Embedded Image';
+  var body = 'Please find the image below: <br/><img src="cid:myImage" width="200">';
+
+  MailApp.sendEmail({
+    to: recipientEmail,
+    subject: subject,
+    htmlBody: body,
+    inlineImages: {
+      myImage: imageBlob // Attach the image blob as an inline image with CID 'myImage'
+    }
+  });
 }
