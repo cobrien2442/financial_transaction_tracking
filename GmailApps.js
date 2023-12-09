@@ -281,11 +281,14 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
 }
 
 
+
 function s3_runAthenaQuery(depDate) {
+  //function s3_runAthenaQuery() {
+  //var depDate = '11/29/2023'
+  Logger.log('s3_runAthenaQuery')
   // Tells Athena to run Query via TransactionProcessor_step2 lambda
   var depDate1 = depDate
 
-  // have to do a group all to account for merchants double/triple pulling transactions
   var qstring = "SELECT card, purchaseamount, merchantdetails, date, depdate, " +
     "time, ccpay, subject, purchrange, day_of_the_week " +
     "FROM cardtrans.financetrackingraw " +
@@ -311,17 +314,52 @@ function s3_runAthenaQuery(depDate) {
 
   // Tells Athena to run Query via TransactionProcessor_step2 lambda
   var response = UrlFetchApp.fetch('https://ly3uajvsh0.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor_step2', options);
-  var data = JSON.parse(response.getContentText());
-  var queryExecutionId = data["QueryExecutionId"];
+  var rdata = JSON.parse(response.getContentText());
+  var queryExecutionId = rdata["QueryExecutionId"];
 
   Logger.log(queryExecutionId);
 
   Utilities.sleep(2 * 1000);
 
-  s4_getAthenaResults2(queryExecutionId, depDate);
+  const MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
+
+  let objectDate = new Date();
+  Logger.log(objectDate);
+
+  let twoWeeksAgo = new Date(objectDate - 14 * MILLIS_PER_DAY);
+  let formatedTWA = (Utilities.formatDate(twoWeeksAgo, 'America/New_York', 'MM/dd/yyyy')).toString();
+
+  qstring = "SELECT card, purchaseamount, merchantdetails, date, depdate, " +
+    "time, ccpay, subject, purchrange, day_of_the_week " +
+    "FROM cardtrans.financetrackingraw " +
+    "WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + formatedTWA + "','%m/%d/%Y') " +
+    "GROUP BY card, purchaseamount, merchantdetails, date, depdate, " +
+    "time, ccpay, subject, purchrange, day_of_the_week";
+  
+  data = {
+    'query' : qstring
+  }
+
+  options = {
+    'payload': JSON.stringify(data),
+    'headers': headers
+  };
+
+  response = UrlFetchApp.fetch('https://ly3uajvsh0.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor_step2', options);
+
+  rdata = JSON.parse(response.getContentText());
+
+  var queryExecutionId2 = rdata["QueryExecutionId"];
+  
+  Logger.log(queryExecutionId2);
+
+  Utilities.sleep(2 * 1000);
+
+  s4_getAthenaResults2(queryExecutionId,queryExecutionId2,depDate);
 }
 
-function s4_getAthenaResults2(queryExecutionId, depDate) {
+function s4_getAthenaResults2(queryExecutionId,queryExecutionId2,depDate) {
+  Logger.log('s4_getAthenaResults2')
   // Gets Athena results via TransactionProcessor_step3 lambda
   var formData = {
     'queryExecutionId': queryExecutionId,
@@ -341,25 +379,56 @@ function s4_getAthenaResults2(queryExecutionId, depDate) {
 
   Logger.log(options)
   var response = UrlFetchApp.fetch('https://9g1falkc01.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor_step3', options);
-  var data = JSON.parse(response.getContentText());
-  Logger.log(data);
-  GmailApp.sendEmail("cobrien2442@gmail.com", "Card transaction", data);
+  var emailBodytxt = JSON.parse(response.getContentText());
 
-  s5_getAthenaResults(queryExecutionId);
+  s5_grabBoxPlot(emailBodytxt,queryExecutionId2)
 }
 
-function s5_getAthenaResults(queryExecutionId) {
+function s5_grabBoxPlot(emailBodytxt,queryExecutionId2) {
+  Logger.log('s5_grabBoxPlot')
   var url = 'https://1ffccx3cgg.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor_test';
-  //var apiKey = 'your_api_key_here'; // Replace with your API key
   
-  var queryExecutionId = 'b27c6acb-b659-40df-abac-781ef585bceb'
+  var queryExecutionId = queryExecutionId2;
+
+  var plotNeeded = 'boxNeeded';
 
   var headers = {
     "x-api-key": apiKey
   }; 
 
   var formData = {
-    'queryExecutionId': queryExecutionId
+    'queryExecutionId': queryExecutionId,
+    'plotNeeded': plotNeeded
+  };
+
+  var options = {
+    'payload': JSON.stringify(formData),
+    'headers': headers
+  };
+
+  Logger.log(options)
+
+  var response = UrlFetchApp.fetch(url, options);
+  var boxBlob = response.getBlob(); // Get the image as a blob
+
+  s6_grabBarPlot(queryExecutionId2,emailBodytxt,boxBlob)
+}
+
+function s6_grabBarPlot(queryExecutionId2,emailBodytxt,boxBlob) {
+  Logger.log('s6_grabBarPlot')
+  var url = 'https://1ffccx3cgg.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor_test';
+  
+  var queryExecutionId = queryExecutionId2;
+
+  var plotNeeded = 'barNeeded';
+
+  var headers = {
+    "x-api-key": apiKey
+  }; 
+
+  var formData = {
+    'queryExecutionId': queryExecutionId,
+    'plotNeeded': plotNeeded
   };
 
   var options = {
@@ -371,19 +440,28 @@ function s5_getAthenaResults(queryExecutionId) {
   Logger.log(options)
 
   var response = UrlFetchApp.fetch(url, options);
-  var imageBlob = response.getBlob(); // Get the image as a blob
+  var barBlob = response.getBlob(); // Get the image as a blob
+
+  s7_sendEmail(emailBodytxt,barBlob,boxBlob)
+}
+
+//note change email for production
+
+function s7_sendEmail(emailBodytxt, barBlob, boxBlob) {
+  Logger.log('s7_sendEmail')
 
   // Replace 'recipient_email_address' with the email address where you want to send the email
   var recipientEmail = 'cobrien2442@gmail.com';
-  var subject = 'Email with Embedded Image';
-  var body = 'Please find the image below: <br/><img src="cid:myImage" width="200">';
+  var subject = 'Card transaction';
+  var body = emailBodytxt + '<br/><br/>Please find the images below: <br/><img src="cid:barImage" width="200"><br/><img src="cid:boxImage" width="200">';
 
   MailApp.sendEmail({
     to: recipientEmail,
     subject: subject,
     htmlBody: body,
     inlineImages: {
-      myImage: imageBlob // Attach the image blob as an inline image with CID 'myImage'
+      barImage: barBlob, // Attach the barBlob as an inline image with CID 'barImage'
+      boxImage: boxBlob // Attach the boxBlob as an inline image with CID 'boxImage'
     }
   });
 }
