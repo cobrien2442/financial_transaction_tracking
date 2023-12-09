@@ -66,7 +66,6 @@ def lambda_handler(event, context):
         # Get the corresponding values in the correct order for plotting
         sorted_totals = [daily_totals[day] for day in sorted_days]
 
-        # Create the bar chart with the days in the desired order
         plt.figure()
         plt.bar(sorted_days, sorted_totals, color='skyblue')
         plt.xlabel('Day of the Week')
@@ -121,7 +120,7 @@ def lambda_handler(event, context):
 
         # Creating Seaborn boxplot
         plt.figure()  # Create a new figure for Seaborn plot
-        sns.boxplot(data=df, y="PurchaseAmount", x="DayOfWeek", hue="Date", order=order1, legend=False)
+        sns.boxplot(data=df, y="PurchaseAmount", x="DayOfWeek", hue="Date", order=order1, legend=False, width=2)
         plt.xticks(rotation=45)
         plt.title('Transaction costs')
         plt.tight_layout()
