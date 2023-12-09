@@ -31,18 +31,17 @@ def lambda_handler(event, context):
     # Parse the JSON string
     data = json.loads(json_string)
 
-    # Extracting purchase amounts and days of the week
+    # Extracting cols
     data_rows = data['ResultSet']['Rows']
     card_values = [row['Data'][0]['VarCharValue'] for row in data_rows[1:]]
     purchase_amounts = [float(row['Data'][1]['VarCharValue']) for row in data_rows[1:]]
     merchant_details = [row['Data'][2]['VarCharValue'] for row in data_rows[1:]]
     dates = [row['Data'][3]['VarCharValue'] for row in data_rows[1:]]
-    updates = [row['Data'][4]['VarCharValue'] for row in data_rows[1:]]
-    dep_dates = [row['Data'][5]['VarCharValue'] for row in data_rows[1:]]
-    times = [row['Data'][6]['VarCharValue'] for row in data_rows[1:]]
-    cc_pay_values = [float(row['Data'][7]['VarCharValue']) for row in data_rows[1:]]
-    subject_values = [row['Data'][8]['VarCharValue'] for row in data_rows[1:]]
-    purchase_range_values = [row['Data'][9]['VarCharValue'] for row in data_rows[1:]]
+    dep_dates = [row['Data'][4]['VarCharValue'] for row in data_rows[1:]]
+    times = [row['Data'][5]['VarCharValue'] for row in data_rows[1:]]
+    cc_pay_values = [float(row['Data'][6]['VarCharValue']) for row in data_rows[1:]]
+    subject_values = [row['Data'][7]['VarCharValue'] for row in data_rows[1:]]
+    purchase_range_values = [row['Data'][8]['VarCharValue'] for row in data_rows[1:]]
     days_of_week = [row['Data'][-1]['VarCharValue'] for row in data_rows[1:]]
         
     if plotNeeded == 'barNeeded':
@@ -75,12 +74,8 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
-            #'isBase64Encoded': False,
             'isBase64Encoded': True,
-            #'headers': {"Content-Type": "application/json"},
             'headers': {"Content-Type": "image/png"},
-            #try 1 == > "body": json.dumps("{\"bar\": \"encoded_image\", \"box\": \"encoded_image2\"}")
-            #try 2 == > "body": json.dumps("{\"bar\": \encoded_image\, \"box\": \encoded_image2\}")
             'body': encoded_image
         }
 
@@ -99,7 +94,6 @@ def lambda_handler(event, context):
             'Card': card_values,
             'PurchaseAmount': purchase_amounts,
             'Date': date_objects,
-            'Update': updates,
             'DepDate': dep_dates,
             'Time': time_values,
             'Subject': subject_values,
@@ -112,10 +106,13 @@ def lambda_handler(event, context):
         # Count occurrences of each date and create a new column 'DateCount'
         df['DayNumOfTrans'] = df['Date'].map(df['Date'].value_counts())
         df['TimeCount'] = df['Time'].map(df['Time'].value_counts())
+        order1 = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
         # Creating Seaborn boxplot
         plt.figure()  # Create a new figure for Seaborn plot
-        sns.boxplot(data=df, y="PurchaseAmount", x="DayOfWeek")
+        sns.boxplot(data=df, y="PurchaseAmount", x="DayOfWeek", hue="Date", order=order1, legend=False)
+        plt.xticks(rotation=45)
+        plt.title('Transaction costs')
 
         # Save the Seaborn plot to a BytesIO object
         buffer = io.BytesIO()
@@ -126,12 +123,8 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
-            #'isBase64Encoded': False,
             'isBase64Encoded': True,
-            #'headers': {"Content-Type": "application/json"},
             'headers': {"Content-Type": "image/png"},
-            #try 1 == > "body": json.dumps("{\"bar\": \"encoded_image\", \"box\": \"encoded_image2\"}")
-            #try 2 == > "body": json.dumps("{\"bar\": \encoded_image\, \"box\": \encoded_image2\}")
             'body': encoded_image2
         }
         
