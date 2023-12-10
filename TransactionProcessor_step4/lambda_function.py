@@ -120,7 +120,7 @@ def lambda_handler(event, context):
 
         # Creating Seaborn boxplot
         plt.figure()  # Create a new figure for Seaborn plot
-        sns.boxplot(data=df, y="PurchaseAmount", x="DayOfWeek", hue="Date", order=order1, legend=False, width=2)
+        sns.boxplot(data=df, y="PurchaseAmount", x="DayOfWeek", hue="Date", order=order1, width=2)
         plt.xticks(rotation=45)
         plt.title('Transaction costs')
         plt.tight_layout()
@@ -138,4 +138,3 @@ def lambda_handler(event, context):
             'headers': {"Content-Type": "image/png"},
             'body': encoded_image2
         }
-        
