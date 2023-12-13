@@ -16,7 +16,7 @@ A report is sent to the consumer every time a transaction occurs that list:
 
 -Difference between sum of spent vs allowed spending limit
 
-Below is an example of what the email the user recieces after a transaction occurs: 
+Below is an example of what the email the user receives after a transaction occurs: 
 
 ![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/stor_/EndEmail.png?raw=true)
 
@@ -31,7 +31,8 @@ The tracking/reporting of financial transactions is achieved via serverless arch
 Once Wells Fargo detects an electronic payment has been made an email is sent to a Gmail account.
 
 ### step 1
-GoogleApps script has a time driven trigger that runs once every 60 seconds (use [function setFincTrigger()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?plain=1#L5) to activate). If an email is detected that appears to have come from the bank stating a transaction has occured the following occurs: GmailApps script parses the email (via [function s2_queryEmailsSend2AWS()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?plain=1#L46)) to find cost of transaction, the date/time of the transaction, where the transaction took place, and runs a separate search to find last paycheck deposit (via [function s1_lastDepDate()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?plain=1#L24)). This information is then stored in variables (in json format) that is sent to an AWS API. (note: If the API successfully receives the information the script deletes the current email). 
+GoogleApps script has a time driven trigger that runs once every 60 seconds (use [function setFincTrigger()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js) to activate). If an email is detected that appears to have come from the bank stating a transaction has occured the following occurs: GmailApps script parses the email (via [function s2_queryEmailsSend2AWS()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?
+)) to find cost of transaction, the date/time of the transaction, where the transaction took place, and runs a separate search to find last paycheck deposit (via [function s1_lastDepDate()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?plain=1#L24)). This information is then stored in variables (in json format) that is sent to an AWS API. (note: If the API successfully receives the information the script deletes the current email). 
 
 ### step 2
 After the API receives the JSON file, it triggers the first lambda function ([TransactionProcessor.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor.py?plain=1#L1)) to run. This lambda function takes the JSON file, formats it, and then sends the file to a 'raw' AWS S3 bucket.
