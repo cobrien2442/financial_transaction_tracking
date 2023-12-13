@@ -16,13 +16,17 @@ A report is sent to the consumer every time a transaction occurs that list:
 
 -Difference between sum of spent vs allowed spending limit
 
+Below is an example of what the email the user recieces after a transaction occurs: 
+
+![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/stor_/EndEmail.png?raw=true)
+
 ## Process 
 
 The tracking/reporting of financial transactions is achieved via serverless architecture (across multiple cloud platforms) that execute time/event driven functions. 
 
 ### ETL Flow Path (steps explained below)
 
-![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/jpg_store/ETL_flow.png?raw=true)
+![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/stor_/ETL_flow.png?raw=true)
 
 Once Wells Fargo detects an electronic payment has been made an email is sent to a Gmail account.
 
