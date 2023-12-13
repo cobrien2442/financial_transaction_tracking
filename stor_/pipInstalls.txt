@@ -7,3 +7,6 @@ pip install --platform manylinux2014_x86_64 --target=package --implementation cp
 
 Requests
 pip install --platform manylinux2014_x86_64 --target=package --implementation cp --python-version 3.9 --only-binary=:all: --upgrade requests
+
+Seaborn
+pip install --platform manylinux2014_x86_64 --target=package --implementation cp --python-version 3.9 --only-binary=:all: --upgrade seaborn
