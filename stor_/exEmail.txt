@@ -1,0 +1,20 @@
+[image: Wells Fargo Home]
+*A card purchase exceeded your preset amount * 
+You asked us to let you know whenever your Wells Fargo Debit Card is used 
+to make a purchase that exceeds $0.
+*Card* ending in 8083 
+*Purchase amount* 4.97 USD 
+*Merchant details* at CVS/PHARMACY #02 02756--2 in Broomall UNITED STATES 
+*Date* 11/22/2023 12:06 PM US/Pacific 
+For transaction details and your current balance, sign on 
+<https://www.wellsfargo.com> and select this account. To modify or cancel 
+your alerts, please go to Manage Alerts 
+<https://connect.secure.wellsfargo.com/auth/login/present?origin=cob&loginMode=jukePassword&serviceType=setUpAndModifyAlerts&LOB=CONS>
+.
+If you don't recognize this transaction, please call Wells Fargo customer 
+service immediately at 1-800-869-3557, 24 hours a day, 7 days a week.
+*wellsfargo.com* <https://www.wellsfargo.com> | Security Center 
+<https://www.wellsfargo.com/privacy-security/fraud> | Contact Us 
+<https://www.wellsfargo.com/help/contact-us/>
+*Please do not reply to this automated email.* 
+a31ba576-d2a6-4818-9ccd-e7d2f3f2684a  
