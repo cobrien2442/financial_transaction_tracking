@@ -43,6 +43,32 @@ def lambda_handler(event, context):
     subject_values = [row['Data'][7]['VarCharValue'] for row in data_rows[1:]]
     purchase_range_values = [row['Data'][8]['VarCharValue'] for row in data_rows[1:]]
     days_of_week = [row['Data'][-1]['VarCharValue'] for row in data_rows[1:]]
+
+    time_values = [datetime.strptime(time, '%I:%M %p').hour for time in times]
+
+    # Convert 'dates' to datetime objects
+    date_objects = [datetime.strptime(date, '%m/%d/%Y') for date in dates]
+
+    # Convert days_of_week to numerical values
+    #numerical_days = [day_map[day] for day in days_of_week]
+
+    data_dict = {
+        'Card': card_values,
+        'PurchaseAmount': purchase_amounts,
+        'Date': date_objects,
+        'DepDate': dep_dates,
+        'Time': time_values,
+        'Subject': subject_values,
+        'PurchRange': purchase_range_values,
+        'DayOfWeek': days_of_week
+    }
+
+    df = pd.DataFrame(data_dict)
+
+    # Count occurrences of each date and create a new column 'DateCount'
+    df['DayNumOfTrans'] = df['Date'].map(df['Date'].value_counts())
+    df['TimeCount'] = df['Time'].map(df['Time'].value_counts())
+    order1 = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
         
     if plotNeeded == 'barNeeded':
 
@@ -91,32 +117,6 @@ def lambda_handler(event, context):
 
 
     if plotNeeded == 'boxNeeded':
-    
-        time_values = [datetime.strptime(time, '%I:%M %p').hour for time in times]
-
-        # Convert 'dates' to datetime objects
-        date_objects = [datetime.strptime(date, '%m/%d/%Y') for date in dates]
-
-        # Convert days_of_week to numerical values
-        #numerical_days = [day_map[day] for day in days_of_week]
-
-        data_dict = {
-            'Card': card_values,
-            'PurchaseAmount': purchase_amounts,
-            'Date': date_objects,
-            'DepDate': dep_dates,
-            'Time': time_values,
-            'Subject': subject_values,
-            'PurchRange': purchase_range_values,
-            'DayOfWeek': days_of_week
-        }
-
-        df = pd.DataFrame(data_dict)
-
-        # Count occurrences of each date and create a new column 'DateCount'
-        df['DayNumOfTrans'] = df['Date'].map(df['Date'].value_counts())
-        df['TimeCount'] = df['Time'].map(df['Time'].value_counts())
-        order1 = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
         # Creating Seaborn boxplot
         plt.figure()  # Create a new figure for Seaborn plot
