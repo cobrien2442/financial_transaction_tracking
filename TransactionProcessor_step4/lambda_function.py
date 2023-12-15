@@ -83,11 +83,8 @@ def lambda_handler(event, context):
         days = list(daily_totals.keys())
         totals = list(daily_totals.values())
 
-        # Define the order of days
-        desired_order = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-
         # Sort the days based on the desired order
-        sorted_days = sorted(daily_totals.keys(), key=lambda x: desired_order.index(x))
+        sorted_days = sorted(daily_totals.keys(), key=lambda x: order1.index(x))
 
         # Get the corresponding values in the correct order for plotting
         sorted_totals = [daily_totals[day] for day in sorted_days]
@@ -96,7 +93,7 @@ def lambda_handler(event, context):
         plt.bar(sorted_days, sorted_totals, color='skyblue')
         plt.xlabel('Day of the Week')
         plt.ylabel('Total Purchase Amount')
-        plt.title('Total Purchase Amount per Day of the Week')
+        plt.title('Total Purchase Amount: past 1 week')
         plt.xticks(rotation=45)
         plt.tight_layout()
         plt.show()
@@ -123,7 +120,7 @@ def lambda_handler(event, context):
         #sns.boxplot(data=df, y="PurchaseAmount", x="DayOfWeek", hue="Date", order=order1, width=2)
         sns.boxplot(data=df, y="PurchaseAmount", x="DayOfWeek", order=order1, width=.5)
         plt.xticks(rotation=45)
-        plt.title('Transaction costs')
+        plt.title('Transaction costs: past 1 week')
         plt.tight_layout()
 
         # Save the Seaborn plot to a BytesIO object

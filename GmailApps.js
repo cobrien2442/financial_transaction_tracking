@@ -327,12 +327,15 @@ function s3_runAthenaQuery(depDate) {
   Logger.log(objectDate);
 
   let twoWeeksAgo = new Date(objectDate - 14 * MILLIS_PER_DAY);
+  let oneWeekAgo = new Date(objectDate - 7 * MILLIS_PER_DAY);
   let formatedTWA = (Utilities.formatDate(twoWeeksAgo, 'America/New_York', 'MM/dd/yyyy')).toString();
+  let formatedOWA = (Utilities.formatDate(oneWeekAgo, 'America/New_York', 'MM/dd/yyyy')).toString();
 
   qstring = "SELECT card, purchaseamount, merchantdetails, date, depdate, " +
     "time, ccpay, subject, purchrange, day_of_the_week " +
     "FROM cardtrans.financetrackingraw " +
-    "WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + formatedTWA + "','%m/%d/%Y') " +
+    //"WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + formatedTWA + "','%m/%d/%Y') " +
+    "WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + formatedOWA + "','%m/%d/%Y') " +
     "GROUP BY card, purchaseamount, merchantdetails, date, depdate, " +
     "time, ccpay, subject, purchrange, day_of_the_week";
   
