@@ -114,17 +114,14 @@ def lambda_handler(event, context):
 
     if plotNeeded == 'barNeeded1':
 
-        new_df = pd.DataFrame({
-            'date1': df['Date'],
-            'PurchaseAmount1': df['PurchaseAmount']
-        })
+        # Calculate total purchase amounts for each date
+        daily_totals = df.groupby('Date')['PurchaseAmount'].sum().sort_index(ascending=True)
 
         plt.figure()
-        sns.countplot(new_df, x="date1")
-        #plt.bar(sorted_days, sorted_totals, color='skyblue')
-        plt.xlabel('Date')
+        sns.barplot(x=daily_totals.index, y=daily_totals.values, color='skyblue')
+        plt.xlabel('Day of the Week')
         plt.ylabel('Total Purchase Amount')
-        plt.title('Total Purchase Amount')
+        plt.title('Total Purchase Amount: past 1 week')
         plt.xticks(rotation=45)
         plt.tight_layout()
         plt.show()
@@ -142,6 +139,7 @@ def lambda_handler(event, context):
             'headers': {"Content-Type": "image/png"},
             'body': encoded_image
         }
+
 
     if plotNeeded == 'boxNeeded':
 
