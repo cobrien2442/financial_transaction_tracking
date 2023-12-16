@@ -72,28 +72,15 @@ def lambda_handler(event, context):
         
     if plotNeeded == 'barNeeded':
 
-        # Calculating total purchase amounts for each day
-        daily_totals = {}
-        for day, amount in zip(days_of_week, purchase_amounts):
-            if day in daily_totals:
-                daily_totals[day] += amount
-            else:
-                daily_totals[day] = amount
-        # Create the bar chart
-        days = list(daily_totals.keys())
-        totals = list(daily_totals.values())
-
-        # Sort the days based on the desired order
-        sorted_days = sorted(daily_totals.keys(), key=lambda x: order1.index(x))
-
-        # Get the corresponding values in the correct order for plotting
-        sorted_totals = [daily_totals[day] for day in sorted_days]
+        # Sort DataFrame by 'Date' column
+        df_sorted = df.sort_values(by='Date')
 
         plt.figure()
-        plt.bar(sorted_days, sorted_totals, color='skyblue')
-        plt.xlabel('Day of the Week')
-        plt.ylabel('Total Purchase Amount')
-        plt.title('Total Purchase Amount: past 1 week')
+        #plt.bar(sorted_days, sorted_totals, color='skyblue')
+        sns.countplot(df_sorted, x="Date")
+        plt.xlabel('Date')
+        plt.ylabel('Number of Transactions')
+        plt.title('Count of Transactions: past 1 week')
         plt.xticks(rotation=45)
         plt.tight_layout()
         plt.show()
@@ -119,7 +106,7 @@ def lambda_handler(event, context):
 
         plt.figure()
         sns.barplot(x=daily_totals.index, y=daily_totals.values, color='skyblue')
-        plt.xlabel('Day of the Week')
+        plt.xlabel('Date')
         plt.ylabel('Total Purchase Amount')
         plt.title('Total Purchase Amount: past 1 week')
         plt.xticks(rotation=45)
