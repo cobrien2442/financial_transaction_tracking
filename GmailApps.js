@@ -393,7 +393,7 @@ function s5_grabBoxPlot(emailBodytxt,queryExecutionId2) {
   
   var queryExecutionId = queryExecutionId2;
 
-  var plotNeeded = 'boxNeeded';
+  var plotNeeded = 'barNeeded';
 
   var headers = {
     "x-api-key": apiKey
