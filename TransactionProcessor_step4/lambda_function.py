@@ -112,6 +112,36 @@ def lambda_handler(event, context):
             'body': encoded_image
         }
 
+    if plotNeeded == 'barNeeded1':
+
+        new_df = pd.DataFrame({
+            'date1': df['Date'],
+            'PurchaseAmount1': df['PurchaseAmount']
+        })
+
+        plt.figure()
+        sns.countplot(new_df, x="date1")
+        #plt.bar(sorted_days, sorted_totals, color='skyblue')
+        plt.xlabel('Date')
+        plt.ylabel('Total Purchase Amount')
+        plt.title('Total Purchase Amount')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
+
+        # Save the first plot to a BytesIO object
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        image_bytes = buffer.getvalue()
+        encoded_image = base64.b64encode(image_bytes).decode('utf-8')
+
+        return {
+            'statusCode': 200,
+            'isBase64Encoded': True,
+            'headers': {"Content-Type": "image/png"},
+            'body': encoded_image
+        }
 
     if plotNeeded == 'boxNeeded':
 

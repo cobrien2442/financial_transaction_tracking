@@ -423,7 +423,7 @@ function s6_grabBarPlot(queryExecutionId2,emailBodytxt,boxBlob) {
   
   var queryExecutionId = queryExecutionId2;
 
-  var plotNeeded = 'barNeeded';
+  var plotNeeded = 'barNeeded1';
 
   var headers = {
     "x-api-key": apiKey
