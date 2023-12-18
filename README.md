@@ -1,24 +1,24 @@
 # Financial Transaction Tracking
 
+## Objective
+
+Get a report every time a transaction occurs that contains:
+
+-How much was spent 
+
+-The sum of transactions per current pay period (restarts every two weeks) 
+
+-Difference between sum of spent vs allowed spending limit
+
+Below is an example email users receive after a transaction occurs: 
+
+![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/stor_/EndEmail.png?raw=true)
+
 ## Summary
 
 With the evolution of 'contactless payment' becoming widely available to the population, the physical action of spending money has become much less taxing to complete. This automation in the spending process has caused a higher volume of transactions compared to times before 'contactless payment' widespread adoption. The reduction of friction in the spending process should be accompanied with automated tracking of transaction interactions and easy to digest spending reports for the consumer. 
 
 This project addresses the automation misalignment seen between the payment process and the process used to track those payments. A higher volume of payments calls for a higher volume of 'tracking reports' to be seen by the consumer to stave off overspending.
-
-## Objective
-
-A report is sent to the consumer every time a transaction occurs that list:
-
--How much was spent 
-
--the sum of transactions per current pay period (restarts every two weeks) 
-
--Difference between sum of spent vs allowed spending limit
-
-Below is an example of what the email the user receives after a transaction occurs: 
-
-![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/stor_/EndEmail.png?raw=true)
 
 ## Process 
 
