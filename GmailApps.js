@@ -43,11 +43,11 @@ function s1_lastDepDate() {
 
   var search = 'in:inbox -in:read subject:Wells Fargo card withdrawal exceeded preset amount from:alerts@notify.wellsfargo.com'
   var ccPay = 3
-  s2_queryEmailsSend2AWS(depDate, search, ccPay);
+  //s2_queryEmailsSend2AWS(depDate, search, ccPay);
 
   search = 'in:inbox -in:read subject:Account update from:alerts@notify.wellsfargo.com'
   ccPay = 4
-  s2_queryEmailsSend2AWS(depDate, search, ccPay);
+  //s2_queryEmailsSend2AWS(depDate, search, ccPay);
 }
 
 function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
@@ -225,6 +225,7 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
   } 
 
   if(ccPay == 4){
+    
     for (var i = 0; i < msgs.length; i++) {
       for (var j = 0; j < msgs[i].length; j++) {
         var subject = msgs[i][j].getSubject();
@@ -232,32 +233,83 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
         var d = new Date();
         var uDate = d.toISOString();
 
-          // Define regular expressions to match the required information
-          const purchaseAmountRegex = /PURCHASE AUTHORIZED ON (\d{2}\/\d{2})\s(.*?)\sCARD (\d+) \$([\d.]+)/g;
+        var withdrawalRegex = /\*Withdrawals\*(.*?)This information is accurate as of/gs;
+        var withdrawalMatches = withdrawalRegex.exec(body);
 
-          // Function to extract information from email body
-          function extractPurchaseInfo(content) {
-            const purchases = [];
-            let match;
-
-            while ((match = purchaseAmountRegex.exec(content)) !== null) {
-              const [, date, merchantDetails, card, purchaseAmount] = match;
-              const info = {
-                'Card': card,
-                'Purchaseamount': purchaseAmount,
-                'Merchantdetails': merchantDetails,
-                'date': date
-              };
-              purchases.push(info);
-            }
-
-            return purchases;
+        //var accountidRegex = /Here is the update you requested for your Wells Fargo account XXXXXXXXX(\d{4})/;
+        var accountidRegex = /Here is the update you requested for your Wells Fargo account\s.+(\d{4})/;
+        var accountid = accountidRegex.exec(body);
+        if (accountid) {
+          var accountidDigits = accountid[1];
           }
 
-          const extractedPurchaseInfo = extractPurchaseInfo(body);
-          const purchasesJSON = JSON.stringify(extractedPurchaseInfo);
-          Logger.log(body);
-          Logger.log(purchasesJSON); // Log the extracted purchase information in JSON format
+
+        if (withdrawalMatches && withdrawalMatches.length > 1) {
+          var extractedContent = withdrawalMatches[1].trim();
+          var lines = extractedContent.split(/(?<=\$\d+\.\d+)\s/);
+
+          //Logger.log(lines);
+
+          for (var k = 0; k < lines.length; k++) {
+            var line = lines[k].trim();
+            //Logger.log(line);
+
+          // Define regular expressions to match the required information
+          //const cardRegex = /\*Card\* \*ending in\* (\d{4})/;
+          const cardRegex = /CARD (\d{4})/;
+          const card2Regex = /\*Card\* ending in (\d{4})/;
+          const cardCredRegex = /Credit card (\d{4})/;
+          //const purchaseAmountRegex = /\$([\d.]+)/;
+          const purchaseAmountRegex = /\$(.+)/;
+          const purchaseAmountCredRegex = /\b\$[\d.]+/g;
+          const dateRegex = /(\d{1,2}\/\d{1,2})/;
+          const dateCredRegex = /\s(\d{1,6})\s/;
+          const merchantDetailsRegex = /PURCHASE AUTHORIZED ON \d{1,2}\/\d{1,2} ([^C]+(?:C(?!ARD)[^C]*)*)/;
+          //const merchantDetailsCredRegex = /PURCHASE AUTHORIZED ON \d{1,2}\/\d{1,2} (.+)/;
+          const merchantDetailsCredRegex = /([^\d]+)\s\d/;
+
+          //NOTE: date info LA Fit => MMDDYY, Venmo => YYMMDD, Houseing => MMDDYY
+
+
+          // Function to extract information from email
+          function extractInfo(content) {
+            const cardMatch = content.match(cardRegex);
+            const cardMatch2 = content.match(card2Regex);
+            const cardMatch3 = content.match(cardCredRegex);
+            const purchaseAmountMatch = content.match(purchaseAmountRegex);
+            const purchaseAmountMatch2 = content.match(purchaseAmountCredRegex);
+            const merchantDetailsMatch = content.match(merchantDetailsRegex);
+            const merchantDetailsMatch2 = content.match(merchantDetailsCredRegex);
+            const dateMatch = content.match(dateRegex);
+            const dateMatch2 = content.match(dateCredRegex);
+
+            var formattedDate = Utilities.formatDate(msgs[i][j].getDate(), "EST", "MM/dd/yyyy hh:mm a");
+
+            const info = {
+              'Card': cardMatch ? cardMatch[1] : (cardMatch2 ? cardMatch2[1] : (cardMatch3 ? cardMatch3[1] : 'ACH')),
+              'Purchaseamount': purchaseAmountMatch ? purchaseAmountMatch[1] : (purchaseAmountMatch2 ? purchaseAmountMatch2[1] : 'Not found'),
+              'Merchantdetails': merchantDetailsMatch ? merchantDetailsMatch[1] : (merchantDetailsMatch2 ? merchantDetailsMatch2[1] : 'Not found'),
+              'date': dateMatch ? dateMatch[1] : (dateMatch2 ? dateMatch2[1] : formattedDate)
+            };
+            return info;
+          }
+          const extractedInfo = extractInfo(line);
+
+          var data = extractedInfo;
+
+          data['accountid'] = accountidDigits;
+
+          //NOTE: use Udate with [k] value as upload name to help avoid overwrites
+
+          //Logger.log([k]);
+          Logger.log(line);
+          Logger.log(data);
+
+          }
+
+        } else {
+          Logger.log('No match found.');
+        }
       }
     }
   }
