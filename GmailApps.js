@@ -37,13 +37,17 @@ function s1_lastDepDate() {
   var ccPay = 1
   s2_queryEmailsSend2AWS(depDate, search, ccPay);
 
-  var search = 'in:inbox -in:read subject:You made a payment from:alerts@notify.wellsfargo.com';
-  var ccPay = 2
-  s2_queryEmailsSend2AWS(depDate, search, ccPay);
+  //var search = 'in:inbox -in:read subject:You made a payment from:alerts@notify.wellsfargo.com';
+  //var ccPay = 2
+  //s2_queryEmailsSend2AWS(depDate, search, ccPay);
 
   var search = 'in:inbox -in:read subject:Wells Fargo card withdrawal exceeded preset amount from:alerts@notify.wellsfargo.com'
   var ccPay = 3
-  s2_queryEmailsSend2AWS(depDate, search, ccPay);
+  //s2_queryEmailsSend2AWS(depDate, search, ccPay);
+
+  search = 'in:inbox -in:read subject:Account update from:alerts@notify.wellsfargo.com'
+  ccPay = 4
+  //s2_queryEmailsSend2AWS(depDate, search, ccPay);
 }
 
 function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
@@ -134,72 +138,9 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
         }
       }
     }
-  } if(ccPay == 2){
-
-    for (var i = 0; i < msgs.length; i++) {
-      for (var j = 0; j < msgs[i].length; j++) {
-        var subject = msgs[i][j].getSubject();
-        var body = msgs[i][j].getPlainBody();
-        var d = new Date();
-        var uDate = d.toISOString();
-        // Send attachments to S3 storage 
-        // Define regular expressions to match the required information
-        const effectiveDateRegex = /The following payment will be effective as of (\d{1,2}\/\d{1,2}\/\d{4}):/;
-        const toAccountRegex = /\*To account \* ([\w\s]+ \d{4}-\d{4}-\d{4}-\d{4})/;
-        const fromAccountRegex = /\*From account \* ([\w\s]+ \d{10})/;
-        const paymentAmountRegex = /\*Payment amount\* \$([\d.]+)/;
-
-        // Function to extract information from email
-        function extractInfo(content) {
-          const effectiveDate = content.match(effectiveDateRegex);
-          const toAccount = content.match(toAccountRegex);
-          const fromAccount = content.match(fromAccountRegex);
-          const paymentAmount = content.match(paymentAmountRegex);
-
-          const info = {
-            'effectiveDate': effectiveDate ? effectiveDate[1] : 'Not found',
-            'toAccount': toAccount ? toAccount[1] : 'Not found',
-            'fromAccount': fromAccount ? fromAccount[1] : 'Not found',
-            'paymentAmount': paymentAmount ? paymentAmount[1] : 'Not found'
-
-          };
-          return info;
-        }
-        const extractedInfo = extractInfo(body);
-
-        var data = extractedInfo;
-        data['depDate'] = depDate;
-        data['upDate'] = uDate;
-        data['subject'] = subject;
-        data['ccPay'] = ccPay;
-
-        var apiJawn = apiKey
-    
-        var headers = {"x-api-key": apiJawn};
-
-        var options = {
-          'payload': JSON.stringify(data),
-          'headers': headers
-        };
-
-        //Logger.log("s2_queryEmailsSend2AWS2()== > search, subject, & options:");
-        Logger.log(options['payload']);
-        //Logger.log("  " + body);
-        //Logger.log("  ");
-
-        //Trouble shooting help (turn below two lines on to trouble shoot issues)
-        //Logger.log("  " + subject);
-        //Logger.log("  " + body);
-
-        //Put 'Try' statement here, if below three lines fail ==> send email info to yourself and stop script
-
-        //var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
-        //Logger.log(response.getContentText());
-        //s3_runAthenaQuery2(depDate);
-        //msgs[i][j].moveToTrash();
-      }
-    }
-  } if(ccPay == 3){
+  } 
+  
+  if(ccPay == 3){
 
     for (var i = 0; i < msgs.length; i++) {
       for (var j = 0; j < msgs[i].length; j++) {
@@ -268,13 +209,107 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
         //Logger.log("  " + body);
 
         //Put 'Try' statement here, if below three lines fail ==> send email info to yourself and stop script
+        try {
+          var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
+          Logger.log(response.getContentText());
+          s3_runAthenaQuery(depDate);
+          msgs[i][j].moveToTrash();
+        }catch(error){
+          Logger.log(error);
+          Logger.log(subject);
+          msgs[i][j].star()
+          msgs[i][j].markRead();
+        }
+      }
+    }
+  } 
 
-        var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
-        //Logger.log(response.getContentText());
-        s3_runAthenaQuery(depDate);
-        msgs[i][j].moveToTrash();
-        //msgs[i][j].markRead();
-        //msgs[i][j].star();
+  if(ccPay == 4){
+    
+    for (var i = 0; i < msgs.length; i++) {
+      for (var j = 0; j < msgs[i].length; j++) {
+        var subject = msgs[i][j].getSubject();
+        var body = msgs[i][j].getPlainBody();
+        var d = new Date();
+        var uDate = d.toISOString();
+
+        var withdrawalRegex = /\*Withdrawals\*(.*?)This information is accurate as of/gs;
+        var withdrawalMatches = withdrawalRegex.exec(body);
+
+        //var accountidRegex = /Here is the update you requested for your Wells Fargo account XXXXXXXXX(\d{4})/;
+        var accountidRegex = /Here is the update you requested for your Wells Fargo account\s.+(\d{4})/;
+        var accountid = accountidRegex.exec(body);
+        if (accountid) {
+          var accountidDigits = accountid[1];
+          }
+
+
+        if (withdrawalMatches && withdrawalMatches.length > 1) {
+          var extractedContent = withdrawalMatches[1].trim();
+          var lines = extractedContent.split(/(?<=\$\d+\.\d+)\s/);
+
+          //Logger.log(lines);
+
+          for (var k = 0; k < lines.length; k++) {
+            var line = lines[k].trim();
+            //Logger.log(line);
+
+          // Define regular expressions to match the required information
+          //const cardRegex = /\*Card\* \*ending in\* (\d{4})/;
+          const cardRegex = /CARD (\d{4})/;
+          const card2Regex = /\*Card\* ending in (\d{4})/;
+          const cardCredRegex = /Credit card (\d{4})/;
+          //const purchaseAmountRegex = /\$([\d.]+)/;
+          const purchaseAmountRegex = /\$(.+)/;
+          const purchaseAmountCredRegex = /\b\$[\d.]+/g;
+          const dateRegex = /(\d{1,2}\/\d{1,2})/;
+          const dateCredRegex = /\s(\d{1,6})\s/;
+          const merchantDetailsRegex = /PURCHASE AUTHORIZED ON \d{1,2}\/\d{1,2} ([^C]+(?:C(?!ARD)[^C]*)*)/;
+          //const merchantDetailsCredRegex = /PURCHASE AUTHORIZED ON \d{1,2}\/\d{1,2} (.+)/;
+          const merchantDetailsCredRegex = /([^\d]+)\s\d/;
+
+          //NOTE: date info LA Fit => MMDDYY, Venmo => YYMMDD, Houseing => MMDDYY
+
+
+          // Function to extract information from email
+          function extractInfo(content) {
+            const cardMatch = content.match(cardRegex);
+            const cardMatch2 = content.match(card2Regex);
+            const cardMatch3 = content.match(cardCredRegex);
+            const purchaseAmountMatch = content.match(purchaseAmountRegex);
+            const purchaseAmountMatch2 = content.match(purchaseAmountCredRegex);
+            const merchantDetailsMatch = content.match(merchantDetailsRegex);
+            const merchantDetailsMatch2 = content.match(merchantDetailsCredRegex);
+            const dateMatch = content.match(dateRegex);
+            const dateMatch2 = content.match(dateCredRegex);
+
+            var formattedDate = Utilities.formatDate(msgs[i][j].getDate(), "EST", "MM/dd/yyyy hh:mm a");
+
+            const info = {
+              'Card': cardMatch ? cardMatch[1] : (cardMatch2 ? cardMatch2[1] : (cardMatch3 ? cardMatch3[1] : 'ACH')),
+              'Purchaseamount': purchaseAmountMatch ? purchaseAmountMatch[1] : (purchaseAmountMatch2 ? purchaseAmountMatch2[1] : 'Not found'),
+              'Merchantdetails': merchantDetailsMatch ? merchantDetailsMatch[1] : (merchantDetailsMatch2 ? merchantDetailsMatch2[1] : 'Not found'),
+              'date': dateMatch ? dateMatch[1] : (dateMatch2 ? dateMatch2[1] : formattedDate)
+            };
+            return info;
+          }
+          const extractedInfo = extractInfo(line);
+
+          var data = extractedInfo;
+
+          data['accountid'] = accountidDigits;
+
+          //NOTE: use Udate with [k] value as upload name to help avoid overwrites
+
+          //Logger.log([k]);
+          Logger.log(line);
+          Logger.log(data);
+
+          }
+
+        } else {
+          Logger.log('No match found.');
+        }
       }
     }
   }
