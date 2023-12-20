@@ -298,14 +298,38 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
           var data = extractedInfo;
 
           data['accountid'] = accountidDigits;
+          data['depDate'] = depDate;
+          data['upDate'] = uDate + k;
+          data['ccPay'] = ccPay;
 
           //NOTE: use Udate with [k] value as upload name to help avoid overwrites
+
+          var apiJawn = apiKey
+    
+          var headers = {"x-api-key": apiJawn};
+  
+          var options = {
+            'payload': JSON.stringify(data),
+            'headers': headers
+          }
 
           //Logger.log([k]);
           Logger.log(line);
           Logger.log(data);
 
+          try {
+            var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
+            Logger.log(response.getContentText());
+            s3_runAthenaQuery(depDate);
+            msgs[i][j].moveToTrash();
+          }catch(error){
+            Logger.log(error);
+            Logger.log(subject);
+            msgs[i][j].star()
+            msgs[i][j].markRead();
           }
+
+        }
 
         } else {
           Logger.log('No match found.');
