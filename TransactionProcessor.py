@@ -54,8 +54,10 @@ def toS3(body):
     
     fileName = str(upDateClean) + ".json"
     bucket = "financetrackingraw"
+    bucket2 = "financetrackingraw2"
     s3 = boto3.resource('s3')
     s3object = s3.Object(bucket, fileName)
+    s3object2 = s3.Object(bucket2, fileName)
     
     if (body['ccPay'] == 0 or body['ccPay'] == 3):
         intDatetime = body['date'][:-11]
@@ -98,6 +100,28 @@ def toS3(body):
         body['day_of_the_week'] = timeObj.strftime('%A')
     
         s3object.put(
+            Body=(bytes(json.dumps(body).encode('UTF-8')))
+        )    
+        
+        return {
+            'statusCode': 200,
+            #'intialbody': intibody
+            'body': body
+        }
+
+    if body['ccPay'] == 4:
+        
+        intDatetime = body['date']
+        
+        timeFormat = '%m/%d/%Y %I:%M %p'
+        
+        timeObj = datetime.strptime(intDatetime, timeFormat)
+        
+        body['date'] = timeObj.strftime('%m/%d/%Y')
+        body['time'] = timeObj.strftime('%I:%M %p')
+        body['day_of_the_week'] = timeObj.strftime('%A')
+    
+        s3object2.put(
             Body=(bytes(json.dumps(body).encode('UTF-8')))
         )    
         
