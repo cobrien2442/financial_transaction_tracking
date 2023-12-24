@@ -251,13 +251,16 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
           //Logger.log(lines);
 
           for (var k = 0; k < lines.length; k++) {
-            var line = lines[k].trim();
-            //Logger.log(line);
+            //var line = lines[k].trim();
+            //var line = lines[k].replace(/\r/g, ' ').trim();
+            var line = lines[k].replace(/\n/g, ' ').replace(/\r/g, ' ').replace(/  /g, ' ').trim();
+
+
 
           // Define regular expressions to match the required information
           //const cardRegex = /\*Card\* \*ending in\* (\d{4})/;
           const cardRegex = /CARD (\d{4})/;
-          const card2Regex = /\*Card\* ending in (\d{4})/;
+          const card2Regex = /Card\s\s(\d{4})/;
           const cardCredRegex = /Credit card (\d{4})/;
           //const purchaseAmountRegex = /\$([\d.]+)/;
           const purchaseAmountRegex = /\$(.+)/;
@@ -267,6 +270,7 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
           const merchantDetailsRegex = /PURCHASE AUTHORIZED ON \d{1,2}\/\d{1,2} ([^C]+(?:C(?!ARD)[^C]*)*)/;
           //const merchantDetailsCredRegex = /PURCHASE AUTHORIZED ON \d{1,2}\/\d{1,2} (.+)/;
           const merchantDetailsCredRegex = /([^\d]+)\s\d/;
+          const merchantDetails2Regex = /ONLINE TRANSFER REF .+ TO WELLS FARGO ACTIVE CASH VISA CARD .+(\d{4}) ON/;
 
           //NOTE: date info LA Fit => MMDDYY, Venmo => YYMMDD, Houseing => MMDDYY
 
@@ -279,7 +283,9 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
             const purchaseAmountMatch = content.match(purchaseAmountRegex);
             const purchaseAmountMatch2 = content.match(purchaseAmountCredRegex);
             const merchantDetailsMatch = content.match(merchantDetailsRegex);
-            const merchantDetailsMatch2 = content.match(merchantDetailsCredRegex);
+            const merchantDetailsMatch3 = content.match(merchantDetailsCredRegex);
+            //const merchantDetailsMatch2 = "credit card payment to " + content.match(merchantDetails2Regex);
+            const merchantDetailsMatch2 = content.match(merchantDetails2Regex);
             const dateMatch = content.match(dateRegex);
             const dateMatch2 = content.match(dateCredRegex);
 
@@ -288,7 +294,8 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
             const info = {
               'Card': cardMatch ? cardMatch[1] : (cardMatch2 ? cardMatch2[1] : (cardMatch3 ? cardMatch3[1] : 'ACH')),
               'Purchaseamount': purchaseAmountMatch ? purchaseAmountMatch[1] : (purchaseAmountMatch2 ? purchaseAmountMatch2[1] : 'Not found'),
-              'Merchantdetails': merchantDetailsMatch ? merchantDetailsMatch[1] : (merchantDetailsMatch2 ? merchantDetailsMatch2[1] : 'Not found'),
+              //'Merchantdetails': merchantDetailsMatch ? merchantDetailsMatch[1] : (merchantDetailsMatch2 ? merchantDetailsMatch2[1] : 'Not found'),
+              'Merchantdetails': merchantDetailsMatch ? merchantDetailsMatch[1] : (merchantDetailsMatch2 ? "credit card payment for card " + merchantDetailsMatch2[1] : (merchantDetailsMatch3 ? merchantDetailsMatch3[1] : 'Not found')),
               'date': dateMatch ? dateMatch[1] : (dateMatch2 ? dateMatch2[1] : formattedDate)
             };
             return info;
@@ -312,10 +319,6 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
             'payload': JSON.stringify(data),
             'headers': headers
           }
-
-          //Logger.log([k]);
-          Logger.log(line);
-          Logger.log(data);
 
           try {
             var response = UrlFetchApp.fetch('https://1ntkk45k1b.execute-api.us-east-1.amazonaws.com/default/TransactionProcessor', options);
