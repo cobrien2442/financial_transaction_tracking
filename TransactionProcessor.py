@@ -130,6 +130,19 @@ def toS3(body):
                 s3object.put(
                     Body=(bytes(json.dumps(body).encode('UTF-8')))
                 )    
+
+            else:
+                timeFormat = '%m%d'
+                intDatetime = body['date']
+                timeObj = datetime.strptime(intDatetime, timeFormat)
+
+                body['date'] = timeObj.strftime('%m/%d/%Y')
+                body['time'] = timeObj.strftime('%I:%M %p')
+                body['day_of_the_week'] = timeObj.strftime('%A')
+
+                s3object.put(
+                    Body=(bytes(json.dumps(body).encode('UTF-8')))
+                )   
                 
         return {
             'statusCode': 200,
