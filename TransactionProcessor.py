@@ -118,18 +118,32 @@ def toS3(body):
         if body['CARD'] == 'ACH':
             # make sure below matches db schema
 
-            if "/" in body['date']:
-                timeFormat = '%m/%d'
-                intDatetime = body['date']
-                timeObj = datetime.strptime(intDatetime, timeFormat)
+            if len(body['date']) == 6:
+                formats_to_check = ['%d%m%y', '%d%m%Y']  # Define the date formats to check
 
-                body['date'] = timeObj.strftime('%m/%d/%Y')
-                body['time'] = timeObj.strftime('%I:%M %p')
-                body['day_of_the_week'] = timeObj.strftime('%A')
+                for date_format in formats_to_check:
+                    try:
+                        date_obj = datetime.strptime(body['date'], date_format)
+                        # Check if the date is within 30 days of the current date
+                        today = datetime.now()
+                        thirty_days_ago = today - timedelta(days=30)
+                        if thirty_days_ago <= date_obj <= today:
 
-                s3object.put(
-                    Body=(bytes(json.dumps(body).encode('UTF-8')))
-                )    
+                            intDatetime = body['date']
+        
+                            timeFormat = {date_format}
+                            
+                            timeObj = datetime.strptime(intDatetime, timeFormat)
+                            
+                            body['date'] = timeObj.strftime('%m/%d/%Y')
+                            body['time'] = timeObj.strftime('%I:%M %p')
+                            body['day_of_the_week'] = timeObj.strftime('%A')
+
+                            s3object.put(
+                                Body=(bytes(json.dumps(body).encode('UTF-8')))
+                            )   
+                    except ValueError:
+                        pass
 
             else:
                 timeFormat = '%m%d'
