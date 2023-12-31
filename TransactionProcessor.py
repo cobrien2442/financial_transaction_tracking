@@ -119,7 +119,7 @@ def toS3(body):
             # make sure below matches db schema
 
             if len(body['date']) == 6:
-                formats_to_check = ['%d%m%y', '%d%m%Y']  # Define the date formats to check
+                formats_to_check = ['%d%m%y','%d%m%Y','%m%d','%m/%d/%Y','%m/%d']  # Define the date formats to check
 
                 for date_format in formats_to_check:
                     try:
