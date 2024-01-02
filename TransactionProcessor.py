@@ -111,55 +111,45 @@ def toS3(body):
 
     if body['ccPay'] == 4:
 
-        s3object2.put(
-            Body=(bytes(json.dumps(body).encode('UTF-8')))
-        )
+        s3object2.put(Body=(bytes(json.dumps(body).encode('UTF-8'))))
 
-        if body['CARD'] == 'ACH':
+        if body['Card'] == 'ACH':
             # make sure below matches db schema
 
-            if len(body['date']) == 6:
-                formats_to_check = ['%d%m%y','%d%m%Y','%m%d','%m/%d/%Y','%m/%d']  # Define the date formats to check
+            formats_to_check = ['%m/%d','%d%m%y','%d%m%Y','%m/%d/%Y','%m%d','%m%d%Y']  # Define the date formats to check
 
-                for date_format in formats_to_check:
-                    try:
-                        date_obj = datetime.strptime(body['date'], date_format)
-                        # Check if the date is within 30 days of the current date
-                        today = datetime.now()
-                        thirty_days_ago = today - timedelta(days=30)
-                        if thirty_days_ago <= date_obj <= today:
+            for date_format in formats_to_check:
+                try:
+                    date_obj = datetime.strptime(body['date'], date_format)
+                    # Check if the date is within 30 days of the current date
+                    today = datetime.now()
+                    thirty_days_ago = today - timedelta(days=30)
+                    #if thirty_days_ago <= date_obj <= today:
+                    if thirty_days_ago >= date_obj:
+                        #s3object.put(Body=(bytes(json.dumps(body).encode('UTF-8'))))
+                        intDatetime = body['date']
+                        timeFormat = date_format
+                        timeObj = datetime.strptime(intDatetime, timeFormat)
 
-                            intDatetime = body['date']
-        
-                            timeFormat = {date_format}
-                            
-                            timeObj = datetime.strptime(intDatetime, timeFormat)
-                            
-                            body['date'] = timeObj.strftime('%m/%d/%Y')
-                            body['time'] = timeObj.strftime('%I:%M %p')
-                            body['day_of_the_week'] = timeObj.strftime('%A')
-
-                            s3object.put(
-                                Body=(bytes(json.dumps(body).encode('UTF-8')))
-                            )   
-                    except ValueError:
+                    
+                        body['date'] = timeObj.strftime('%m/%d/%Y')
+                        body['time'] = timeObj.strftime('%I:%M %p')
+                        body['day_of_the_week'] = timeObj.strftime('%A')
+                        
+                        return {
+                            'statusCode': 200,
+                            # 'initialbody': intibody
+                            'body': body
+                        }
+                    
+                        
+                except ValueError:
                         pass
-
-            else:
-                timeFormat = '%m%d'
-                intDatetime = body['date']
-                timeObj = datetime.strptime(intDatetime, timeFormat)
-
-                body['date'] = timeObj.strftime('%m/%d/%Y')
-                body['time'] = timeObj.strftime('%I:%M %p')
-                body['day_of_the_week'] = timeObj.strftime('%A')
-
-                s3object.put(
-                    Body=(bytes(json.dumps(body).encode('UTF-8')))
-                )   
-                
-        return {
-            'statusCode': 200,
-            # 'initialbody': intibody
-            'body': body
-        }
+        
+        else:
+        
+            return {
+                'statusCode': 200,
+                # 'initialbody': intibody
+                'body': body
+            }

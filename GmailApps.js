@@ -306,7 +306,7 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
 
           data['accountid'] = accountidDigits;
           data['depDate'] = depDate;
-          data['upDate'] = uDate + k;
+          data['upDate'] = uDate + [i][j] + [k];
           data['ccPay'] = ccPay;
 
           //NOTE: use Udate with [k] value as upload name to help avoid overwrites
