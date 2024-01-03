@@ -294,9 +294,10 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
             const info = {
               'Card': cardMatch ? cardMatch[1] : (cardMatch2 ? cardMatch2[1] : (cardMatch3 ? cardMatch3[1] : 'ACH')),
               'Purchaseamount': purchaseAmountMatch ? purchaseAmountMatch[1] : (purchaseAmountMatch2 ? purchaseAmountMatch2[1] : 'Not found'),
-              //'Merchantdetails': merchantDetailsMatch ? merchantDetailsMatch[1] : (merchantDetailsMatch2 ? merchantDetailsMatch2[1] : 'Not found'),
               'Merchantdetails': merchantDetailsMatch ? merchantDetailsMatch[1] : (merchantDetailsMatch2 ? "credit card payment for card " + merchantDetailsMatch2[1] : (merchantDetailsMatch3 ? merchantDetailsMatch3[1] : 'Not found')),
-              'date': dateMatch ? dateMatch[1] : (dateMatch2 ? dateMatch2[1] : formattedDate)
+              //'date': dateMatch ? dateMatch[1] : (dateMatch2 ? dateMatch2[1] : formattedDate)
+              //Note if above line is imp'ed (below line removed) py 1 would need updates
+              'date': formattedDate
             };
             return info;
           }
@@ -308,8 +309,6 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
           data['depDate'] = depDate;
           data['upDate'] = uDate + [i][j] + [k];
           data['ccPay'] = ccPay;
-
-          //NOTE: use Udate with [k] value as upload name to help avoid overwrites
 
           var apiJawn = apiKey
     
