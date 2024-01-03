@@ -47,7 +47,7 @@ function s1_lastDepDate() {
 
   search = 'in:inbox -in:read subject:Account update from:alerts@notify.wellsfargo.com'
   ccPay = 4
-  //s2_queryEmailsSend2AWS(depDate, search, ccPay);
+  s2_queryEmailsSend2AWS(depDate, search, ccPay);
 }
 
 function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
