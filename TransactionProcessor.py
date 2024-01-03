@@ -116,7 +116,9 @@ def toS3(body):
         if body['Card'] == 'ACH':
             # make sure below matches db schema
 
-            formats_to_check = ['%m/%d','%d%m%y','%d%m%Y','%m/%d/%Y','%m%d','%m%d%Y']  # Define the date formats to check
+            #formats_to_check = ['%m/%d','%d%m%y','%d%m%Y','%m/%d/%Y','%m%d','%m%d%Y','%y%m%d']  # Define the date formats to check
+            #will need to fix code to run above line, code will run below line for now
+            formats_to_check = ['%m/%d/%Y %I:%M %p']  # Define the date formats to check
 
             for date_format in formats_to_check:
                 try:
@@ -125,7 +127,7 @@ def toS3(body):
                     today = datetime.now()
                     thirty_days_ago = today - timedelta(days=30)
                     #if thirty_days_ago <= date_obj <= today:
-                    if thirty_days_ago >= date_obj:
+                    if thirty_days_ago <= date_obj <= today:
                         #s3object.put(Body=(bytes(json.dumps(body).encode('UTF-8'))))
                         intDatetime = body['date']
                         timeFormat = date_format
@@ -135,6 +137,8 @@ def toS3(body):
                         body['date'] = timeObj.strftime('%m/%d/%Y')
                         body['time'] = timeObj.strftime('%I:%M %p')
                         body['day_of_the_week'] = timeObj.strftime('%A')
+                        
+                        s3object.put(Body=(bytes(json.dumps(body).encode('UTF-8'))))
                         
                         return {
                             'statusCode': 200,
