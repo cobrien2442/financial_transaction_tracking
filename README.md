@@ -49,5 +49,3 @@ Only one graph can be sent per API response, our system includes two graphs. [la
 
 ### step 6
 Once the data is received by the JavaScript an email is sent to the user (via [function s7_sendEmail()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js)).
-
-## Appendix
