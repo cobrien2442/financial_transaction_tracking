@@ -45,9 +45,9 @@ function s1_lastDepDate() {
   var ccPay = 3
   //s2_queryEmailsSend2AWS(depDate, search, ccPay);
 
-  //search = 'in:inbox -in:read subject:Account update from:alerts@notify.wellsfargo.com'
-  //ccPay = 4
-  //s2_queryEmailsSend2AWS(depDate, search, ccPay);
+  search = 'in:inbox -in:read subject:Account update from:alerts@notify.wellsfargo.com'
+  ccPay = 4
+  s2_queryEmailsSend2AWS(depDate, search, ccPay);
 }
 
 function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
@@ -354,12 +354,12 @@ function s3_runAthenaQuery(depDate) {
   var depDate1 = depDate
 
   var qstring = "SELECT card, purchaseamount, merchantdetails, date, depdate, " +
-    "time, ccpay, subject, purchrange, day_of_the_week " +
+    "time, ccpay, purchrange, day_of_the_week " +
     "FROM cardtrans.financetrackingraw " +
     "WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + depDate1 + "','%m/%d/%Y') " +
     "and date_parse(depdate,'%m/%d/%Y') >= date_parse('" + depDate1 + "', '%m/%d/%Y') " +
     "GROUP BY card, purchaseamount, merchantdetails, date, depdate, " +
-    "time, ccpay, subject, purchrange, day_of_the_week";
+    "time, ccpay, purchrange, day_of_the_week";
 
   var data = {
     'query' : qstring
@@ -396,12 +396,12 @@ function s3_runAthenaQuery(depDate) {
   let formatedOWA = (Utilities.formatDate(oneWeekAgo, 'America/New_York', 'MM/dd/yyyy')).toString();
 
   qstring = "SELECT card, purchaseamount, merchantdetails, date, depdate, " +
-    "time, ccpay, subject, purchrange, day_of_the_week " +
+    "time, ccpay, purchrange, day_of_the_week " +
     "FROM cardtrans.financetrackingraw " +
     //"WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + formatedTWA + "','%m/%d/%Y') " +
     "WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + formatedOWA + "','%m/%d/%Y') " +
     "GROUP BY card, purchaseamount, merchantdetails, date, depdate, " +
-    "time, ccpay, subject, purchrange, day_of_the_week";
+    "time, ccpay, purchrange, day_of_the_week";
   
   data = {
     'query' : qstring
