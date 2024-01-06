@@ -2,7 +2,7 @@
 
 ## Objective
 
-Get a report every time a transaction occurs that contains:
+Every time the user makes a financial transaction, an email will be sent to the user containing the following:
 
 -How much was spent 
 
@@ -10,7 +10,9 @@ Get a report every time a transaction occurs that contains:
 
 -Difference between sum of spent vs allowed spending limit
 
-Below is an example email users receive after a transaction occurs: 
+-Graphs illustrating the past weeks transactions
+
+Below is an example email the user receives after a transaction occurs: 
 
 ![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/stor_/EndEmail.png?raw=true)
 
