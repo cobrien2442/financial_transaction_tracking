@@ -18,7 +18,7 @@ Below is an example email the user receives after a transaction occurs:
 
 ## Summary
 
-With the evolution of 'contactless payment' becoming widely available to the population, the physical action of spending money has become much less taxing to complete. This automation in the spending process has caused a higher volume of transactions compared to times before 'contactless payment' widespread adoption. The reduction of friction in the spending process should be accompanied with automated tracking of transaction interactions and easy to digest spending reports for the consumer. 
+With the evolution of 'contactless payment' becoming widely available to the population, the physical action of spending money has become much less taxing to complete. This automation in the spending process has caused a higher volume of transactions to occur compared to times before 'contactless payment' widespread adoption. The reduction of friction in the spending process should be accompanied with automated tracking of transaction interactions and easy to digest spending reports for the consumer. 
 
 This project addresses the automation misalignment seen between the payment process and the process used to track those payments. A higher volume of payments calls for a higher volume of 'tracking reports' to be seen by the consumer to stave off overspending.
 
@@ -26,11 +26,14 @@ This project addresses the automation misalignment seen between the payment proc
 
 The tracking/reporting of financial transactions is achieved via serverless architecture (across multiple cloud platforms) that execute time/event driven functions. 
 
-### ETL Flow Path (steps explained below)
+### ETL Flow Path
+
+A prerequisite of this project requires the user to get their bank to send an email to them when a financial transaction occurs. This can usually be achieved by changing the settings on the account via the bank website or app.
+
+Once the above prerequisite is met and code is implemented in the proper cloud platforms: data received from the bank will flow through the below path
 
 ![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/stor_/ETL_flow.png?raw=true)
 
-Once Wells Fargo detects an electronic payment has been made an email is sent to a Gmail account.
 
 ### step 1
 GoogleApps script has a time driven trigger that runs once every 60 seconds (use [function setFincTrigger()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js) to activate). If an email is detected that appears to have come from the bank stating a transaction has occured the following occurs: GmailApps script parses the email (via [function s2_queryEmailsSend2AWS()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?)) to find cost of transaction, the date/time of the transaction, where the transaction took place, and runs a separate search to find last paycheck deposit (via [function s1_lastDepDate()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js)). This information is then stored in variables (in json format) that is sent to an AWS API. (note: If the API successfully receives the information the script deletes the current email).
