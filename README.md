@@ -35,8 +35,12 @@ Once the above prerequisite is met and code is implemented in the proper cloud p
 ![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/stor_/ETL_flow.png?raw=true)
 
 
-### step 1
-GoogleApps script has a time driven trigger that runs once every 60 seconds (use [function setFincTrigger()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js) to activate). If an email is detected that appears to have come from the bank stating a transaction has occured the following occurs: GmailApps script parses the email (via [function s2_queryEmailsSend2AWS()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?)) to find cost of transaction, the date/time of the transaction, where the transaction took place, and runs a separate search to find last paycheck deposit (via [function s1_lastDepDate()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js)). This information is then stored in variables (in json format) that is sent to an AWS API. (note: If the API successfully receives the information the script deletes the current email).
+### step 1 (Google Apps Script)
+
+A time driven trigger (set to run every 60 seconds) searches the user’s inbox for ‘financial transaction’ emails from the bank. The key words the script is looking for can be found here: [function s1_lastDepDate()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js). Once an email is detected, the script utilizes regular expression searches to find cost of transaction, the date/time of the transaction, and where the transaction took place. The regular expressions can be found here: [function s2_queryEmailsSend2AWS()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?). The data found is stored in JSON format and sent to an API. 
+
+See XXX for examples of emails and the JSON data that would be returned from them. 
+
 
 ### step 2
 After the API receives the JSON file, it triggers the first lambda function ([TransactionProcessor.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor.py)) to run. This lambda function takes the JSON file, formats it, and then sends the file to a 'raw' AWS S3 bucket.
