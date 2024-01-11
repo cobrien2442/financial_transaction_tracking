@@ -135,7 +135,7 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
           Logger.log(subject);
           msgs[i][j].star()
           msgs[i][j].markRead();
-          removeAllTriggers();
+          //removeAllTriggers();
         }
       }
     }
@@ -220,7 +220,7 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
           Logger.log(subject);
           msgs[i][j].star()
           msgs[i][j].markRead();
-          removeAllTriggers();
+          //removeAllTriggers();
         }
       }
     }
@@ -331,7 +331,7 @@ function s2_queryEmailsSend2AWS(depDate, search, ccPay) {
             Logger.log(subject);
             msgs[i][j].star()
             msgs[i][j].markRead();
-            removeAllTriggers();
+            //removeAllTriggers();
           }
 
         }
