@@ -43,6 +43,7 @@ See (link to "Sample_data" when ready) for examples of emails and the JSON data 
 
 
 ### step 2 (AWS:Lambda, AWS:API Gateway, and AWS:S3)
+
 After the API receives the JSON file, it triggers the first lambda function ([TransactionProcessor.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor.py)) to run. This lambda function categorizes the data set, formats the date variable, sends data to multiple ‘raw’ S3 databases (based on category), and returns 200 code as the API response. 
 
 See (link to "Sample_data" when ready) for examples of JSON data that before ([TransactionProcessor.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor.py)) versus how the data looks in the ‘raw’ databases
@@ -51,9 +52,10 @@ See (link to "Sample_data" when ready) for examples of JSON data that before ([T
 
 After receiving confirmation that the json data has been uploaded to the S3 bucket, Gmail Apps Script request (via [function s3_runAthenaQuery()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js)) to execute a Lambda function ([TransactionProcessor_step2.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor_step2.py)) that runs two separate Athena SQL queries. The first query grabs all data from transactions that occurred in the current pay period and the second query grabs all the data from the past week. By design the results of the queries are stored in a ‘clean’ S3 bucket and the query i.d.’s are returned by the API to the Gmail Apps script.
 
+### step 4 (Google Apps Script, AWS:API_Gateway, AWS:Lambda, AWS:S3, AWS:Athena)
 
-### step 4
-The JavaScript pauses to allow the query to finish properly before making another API request (via [function s4_getAthenaResults2()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js)). This API request triggers a Lambda function ([TransactionProcessor_step3.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor_step3.py)) to retrieve the query results from the 'clean' S3 bucket. The lambda function uses the last deposit date, the sum of transaction cost, and other data to relay information (in the form of a string) back to gmail via the API response. 
+The JavaScript pauses to allow the query to finish properly before making another API request (via [function s4_getAthenaResults2()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js)). This API request triggers a Lambda function ([TransactionProcessor_step3.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor_step3.py)) to retrieve the information from the query that grabbed all data from transactions that occurred in the current pay period. The ‘purchase amounts’ are extracted and summed. The date that pay check was last deposited has two weeks added to it to find the next pay day. The latest transaction date in the data set is found and the data in that row is extracted; this information used to created the “You’ve spent XXX of your XXX allowance…” statement found in the example email in the Objective section. 
+
 
 ### step 5
 The gmailapps JavaScript [function s5_grabBoxPlot()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js) stores the string data in a variable and makes a call to an API that runs [lambda_function.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor_step4/lambda_function.py)(AKA TransactionProcessor_step4). The lambda function has multiple python libraries stored in it that allows it to make graphs from the data that’s fed to it. Once the graphs are made it becomes a little tricky to return graph data through an API response. The graphs must be converted to byte data before they can be sent in an API response. The JavaScript needs to convert the byte data back into a png file.
