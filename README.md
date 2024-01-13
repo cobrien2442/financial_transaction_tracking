@@ -39,14 +39,13 @@ Once the above prerequisite is met and code is implemented in the proper cloud p
 
 A time driven trigger (set to run every 60 seconds) searches the user’s inbox for ‘financial transaction’ emails from the bank. The key words the script is looking for can be found here: [function s1_lastDepDate()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js). Once an email is detected, the script utilizes regular expression searches to find cost of transaction, the date/time of the transaction, and where the transaction took place. The regular expressions can be found here: [function s2_queryEmailsSend2AWS()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js?). The data found is stored in JSON format and sent to an API. 
 
-See (link to "Sample_data" when ready) for examples of emails and the JSON data that would be returned from them
+See below picture for an example of how the raw data looks (AKA email from bank)
 
+![alt text](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/stor_/bankData.png?raw=true)
 
 ### step 2 (AWS:Lambda, AWS:API Gateway, and AWS:S3)
 
 After the API receives the JSON file, it triggers the first lambda function ([TransactionProcessor.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor.py)) to run. This lambda function categorizes the data set, formats the date variable, sends data to multiple ‘raw’ S3 databases (based on category), and returns 200 code as the API response. 
-
-See (link to "Sample_data" when ready) for examples of JSON data that before ([TransactionProcessor.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor.py)) versus how the data looks in the ‘raw’ databases
 
 ### step 3 (Google Apps Script, AWS:API_Gateway, AWS:Lambda, AWS:S3, AWS:Athena)
 
@@ -57,10 +56,11 @@ After receiving confirmation that the json data has been uploaded to the S3 buck
 The JavaScript pauses to allow the query to finish properly before making another API request (via [function s4_getAthenaResults2()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js)). This API request triggers a Lambda function ([TransactionProcessor_step3.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor_step3.py)) to retrieve the information from the query that grabbed all data from transactions that occurred in the current pay period. The ‘purchase amounts’ are extracted and summed. The date that pay check was last deposited has two weeks added to it to find the next pay day. The latest transaction date in the data set is found and the data in that row is extracted; this information used to created the “You’ve spent XXX of your XXX allowance…” statement found in the example email in the Objective section. 
 
 
-### step 5
-The gmailapps JavaScript [function s5_grabBoxPlot()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js) stores the string data in a variable and makes a call to an API that runs [lambda_function.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor_step4/lambda_function.py)(AKA TransactionProcessor_step4). The lambda function has multiple python libraries stored in it that allows it to make graphs from the data that’s fed to it. Once the graphs are made it becomes a little tricky to return graph data through an API response. The graphs must be converted to byte data before they can be sent in an API response. The JavaScript needs to convert the byte data back into a png file.
+### step 5 (Google Apps Script, AWS:API_Gateway, AWS:Lambda, AWS:S3)
 
-Only one graph can be sent per API response, our system includes two graphs. [lambda_function.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor_step4/lambda_function.py)(AKA TransactionProcessor_step4) contains the code to return both of the graphs shown in the example email. The lambda function utilizes input data and 'if' statements to control which plots are returned to the JavaScript. 
+The gmailapps JavaScript [function s5_grabBoxPlot()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js) and [function s6_grabBarPlot()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js) stores the string data in a variable and makes a call to an API that runs [lambda_function.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor_step4/lambda_function.py)(AKA TransactionProcessor_step4). The lambda function has multiple python libraries loaded into it that allows data fed into it to be converted into a graph.Once the graphs are made it becomes a little tricky to return visual data through an API response. The graphs must be converted to byte data before they can be sent in an API response. The JavaScript needs to convert the byte data back into a png file.
+
+It became very challenging to try and return two different graphs that had been converted into bytes. The solution I found was to make an API call for one of the graphs, store the response in the JavaScript, then make a separate call for the second graph, and then storing both graphs in  varibles in the JavaScript. [lambda_function.py](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/TransactionProcessor_step4/lambda_function.py)(AKA TransactionProcessor_step4) contains the code to return both of the graphs shown in the example email. The lambda function utilizes input data and 'if' statements to control which plots are returned to the JavaScript.
 
 ### step 6
 Once the data is received by the JavaScript an email is sent to the user (via [function s7_sendEmail()](https://github.com/cobrien2442/financial_transaction_tracking/blob/main/GmailApps.js)).
