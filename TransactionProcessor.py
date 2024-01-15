@@ -113,7 +113,7 @@ def toS3(body):
 
         s3object2.put(Body=(bytes(json.dumps(body).encode('UTF-8'))))
 
-        if body['Card'] == 'ACH':
+        if body['Card'] == 'ACH' and body['Purchaseamount'] < 3000:
             # make sure below matches db schema
 
             #formats_to_check = ['%m/%d','%d%m%y','%d%m%Y','%m/%d/%Y','%m%d','%m%d%Y','%y%m%d']  # Define the date formats to check
