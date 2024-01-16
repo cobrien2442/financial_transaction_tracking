@@ -69,6 +69,7 @@ def lambda_handler(event, context):
     df['DayNumOfTrans'] = df['Date'].map(df['Date'].value_counts())
     df['TimeCount'] = df['Time'].map(df['Time'].value_counts())
     order1 = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    df['date_mmdd'] = df['Date'][-4:]
         
     if plotNeeded == 'barNeeded':
 
