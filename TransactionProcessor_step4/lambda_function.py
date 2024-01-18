@@ -77,9 +77,10 @@ def lambda_handler(event, context):
         df_sorted = df.sort_values(by='Date')
 
         plt.figure()
-        #plt.bar(sorted_days, sorted_totals, color='skyblue')
         sns.countplot(df_sorted, x="Date")
+        #sns.countplot(df_sorted, x="date_mmdd")
         plt.xlabel('Date')
+        #plt.xlabel('date_mmdd')
         plt.ylabel('Number of Transactions')
         plt.title('Count of Transactions: past 1 week')
         plt.xticks(rotation=45)
@@ -104,10 +105,12 @@ def lambda_handler(event, context):
 
         # Calculate total purchase amounts for each date
         daily_totals = df.groupby('Date')['PurchaseAmount'].sum().sort_index(ascending=True)
+        #daily_totals = df.groupby('date_mmdd')['PurchaseAmount'].sum().sort_index(ascending=True)
 
         plt.figure()
         sns.barplot(x=daily_totals.index, y=daily_totals.values, color='skyblue')
         plt.xlabel('Date')
+        #plt.xlabel('date_mmdd')
         plt.ylabel('Total Purchase Amount')
         plt.title('Total Purchase Amount: past 1 week')
         plt.xticks(rotation=45)
