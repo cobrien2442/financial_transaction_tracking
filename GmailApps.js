@@ -398,8 +398,8 @@ function s3_runAthenaQuery(depDate) {
   qstring = "SELECT card, purchaseamount, merchantdetails, date, depdate, " +
     "time, ccpay, purchrange, day_of_the_week " +
     "FROM cardtrans.financetrackingraw " +
-    "WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + formatedTWA + "','%m/%d/%Y') " +
-    //"WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + formatedOWA + "','%m/%d/%Y') " +
+    //"WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + formatedTWA + "','%m/%d/%Y') " +
+    "WHERE date_parse(date,'%m/%d/%Y') >= date_parse('" + formatedOWA + "','%m/%d/%Y') " +
     "GROUP BY card, purchaseamount, merchantdetails, date, depdate, " +
     "time, ccpay, purchrange, day_of_the_week";
   
