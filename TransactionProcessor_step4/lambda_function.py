@@ -155,3 +155,33 @@ def lambda_handler(event, context):
             'headers': {"Content-Type": "image/png"},
             'body': encoded_image2
         }
+    
+    if plotNeeded == 'week1VsWeek2':
+
+        # Calculate total purchase amounts for each date
+        daily_totals = df.groupby('Date')['PurchaseAmount'].sum().sort_index(ascending=True)
+        #daily_totals = df.groupby('date_mmdd')['PurchaseAmount'].sum().sort_index(ascending=True)
+
+        plt.figure()
+        sns.barplot(x=daily_totals.index, y=daily_totals.values, color='skyblue')
+        plt.xlabel('Date')
+        #plt.xlabel('date_mmdd')
+        plt.ylabel('Total Purchase Amount')
+        plt.title('Total Purchase Amount: past 1 week')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
+
+        # Save the first plot to a BytesIO object
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        image_bytes = buffer.getvalue()
+        encoded_image = base64.b64encode(image_bytes).decode('utf-8')
+
+        return {
+            'statusCode': 200,
+            'isBase64Encoded': True,
+            'headers': {"Content-Type": "image/png"},
+            'body': encoded_image
+        }
