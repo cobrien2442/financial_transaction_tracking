@@ -158,9 +158,6 @@ def lambda_handler(event, context):
     
     if plotNeeded == 'week1VsWeek2':
 
-        # Calculate total purchase amounts for each date
-        daily_totals = df.groupby('Date')['PurchaseAmount'].sum().sort_index(ascending=True)
-        #daily_totals = df.groupby('date_mmdd')['PurchaseAmount'].sum().sort_index(ascending=True)
 
         plt.figure()
         sns.barplot(x=daily_totals.index, y=daily_totals.values, color='skyblue')
