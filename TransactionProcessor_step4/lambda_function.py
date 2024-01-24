@@ -155,13 +155,3 @@ def lambda_handler(event, context):
             'headers': {"Content-Type": "image/png"},
             'body': encoded_image2
         }
-    
-    if plotNeeded == 'week1VsWeek2':
-
-
-        return {
-            'statusCode': 200,
-            'isBase64Encoded': True,
-            'headers': {"Content-Type": "image/png"},
-            'body': encoded_image
-        }
